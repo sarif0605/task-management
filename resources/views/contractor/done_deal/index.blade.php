@@ -1,10 +1,9 @@
 @extends('layouts.admin')
 
-@section('title', 'Home Product')
+@section('title', 'Home Deal Project')
 
 @section('content')
     <div class="d-flex align-items-center justify-content-between">
-        <h1 class="mb-0">List Deal Project</h1>
         <a href="{{ route('deal_projects.create') }}" class="btn btn-primary">Add</a>
     </div>
     <hr />

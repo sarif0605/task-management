@@ -1,17 +1,17 @@
 <?php
 
-namespace App\Http\Requests\Survey;
+namespace App\Http\Requests\Constraint;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class SurveyCreateRequest extends FormRequest
+class ConstraintImageCreateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return true;
+        return false;
     }
 
     /**
@@ -22,9 +22,7 @@ class SurveyCreateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'date' => 'required|date',
-            'prospect_id' => 'required|exists:prospects,id',
-            'survey_results' => 'required'
+            //
         ];
     }
 }

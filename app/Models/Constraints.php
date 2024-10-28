@@ -6,19 +6,21 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Survey extends Model
+class Constraints extends Model
 {
     use HasFactory, HasUuids;
-    protected $table = "surveys";
+
+    protected $table = "operational_projects";
     protected $primaryKey = "id";
     protected $keyType = "string";
     public $incrementing = false;
     public $timestamps = true;
-    protected $fillable = [ 'prospect_id', 'date', 'survey_results'
-    ];
 
-    public function prospect()
-    {
-        return $this->belongsTo(Prospect::class, 'prospect_id', 'id');
-    }
+    protected $fillable = [
+        'operational_project_id',
+        'tanggal',
+        'pekerjaan',
+        'progress',
+        'kendala'
+    ];
 }

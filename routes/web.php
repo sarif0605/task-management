@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DealProjectController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProspectController;
 use App\Http\Controllers\SurveyController;
@@ -46,7 +47,7 @@ Route::middleware('auth')->group(function () {
         Route::delete('destroy/{id}', 'destroy')->name('surveys.destroy');
     });
 
-    Route::controller(DealProject::class)->prefix('deal_projects')->group(function () {
+    Route::controller(DealProjectController::class)->prefix('deal_projects')->group(function () {
         Route::get('', 'index')->name('deal_projects');
         Route::get('create', 'create')->name('deal_projects.create');
         Route::post('store', 'store')->name('deal_projects.store');

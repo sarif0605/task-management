@@ -11,12 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('constraints', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('position');
-            $table->string('email')->unique();
-            $table->string('password');
-            $table->rememberToken();
+            $table->uuid('operational_project_id');
+            $table->foreign('operational_project_id')->references('id')->on('operational_projects');
+            $table->date('tanggal');
+            $table->text('pekerjaan');
+            $table->text('progress');
+            $table->text('kendala');
             $table->timestamps();
         });
     }
@@ -26,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('constraints');
     }
 };

@@ -1,10 +1,9 @@
 @extends('layouts.admin')
 
-@section('title', 'Home Product')
+@section('title', 'Home Prospect')
 
 @section('content')
     <div class="d-flex align-items-center justify-content-between">
-        <h1 class="mb-0">List Prospect</h1>
         <a href="{{ route('prospects.create') }}" class="btn btn-primary">Add Prospect</a>
     </div>
     <hr />
@@ -27,7 +26,7 @@
         </thead>
         <tbody>+
             @if($prospect->count() > 0)
-                @foreach($prospects as $rs)
+                @foreach($prospect as $rs)
                     <tr>
                         <td class="align-middle">{{ $loop->iteration }}</td>
                         <td class="align-middle">{{ $rs->name }}</td>

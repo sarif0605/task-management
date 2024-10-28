@@ -15,7 +15,7 @@ class DealProjectController extends Controller
     public function index()
     {
         $dealProject = DealProject::with('prospect')->get();
-        return view('advertising.sales.deal_project.index', compact('dealProject'));
+        return view('contractor.done_deal.index', compact('dealProject'));
     }
 
     /**

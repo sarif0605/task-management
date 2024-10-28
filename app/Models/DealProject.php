@@ -9,14 +9,12 @@ use Illuminate\Database\Eloquent\Model;
 class DealProject extends Model
 {
     use HasFactory, HasUuids;
-    protected $table = "dealprojects";
+    protected $table = "deal_projects";
     protected $primaryKey = "id";
     protected $keyType = "string";
     public $incrementing = false;
     public $timestamps = true;
-    protected $fillable = [
-        'date','prospect_id','price_quotation', 'nominal'
-    ];
+    protected $fillable = [ 'prospect_id', 'date', 'price_quotation', 'nominal'];
 
     public function prospect()
     {

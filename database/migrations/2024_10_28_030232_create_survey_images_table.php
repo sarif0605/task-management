@@ -11,12 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('survey_images', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('position');
-            $table->string('email')->unique();
-            $table->string('password');
-            $table->rememberToken();
+            $table->uuid('survey_id');
+            $table->foreign('survey_id')->references('id')->on('surveys')->onDelete('cascade')->onUpdate('cascade');
+            $table->string('image_link');
             $table->timestamps();
         });
     }
@@ -26,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('survey_images');
     }
 };

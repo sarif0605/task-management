@@ -15,7 +15,7 @@ class SurveyController extends Controller
     public function index()
     {
         $survey = Survey::with('prospect')->get();
-        return view('advertising.sales.survey.index', compact('survey'));
+        return view('contractor.survey.index', compact('survey'));
     }
 
     /**
@@ -24,7 +24,7 @@ class SurveyController extends Controller
     public function create()
     {
         $prospect = Prospect::all();
-        return view('advertising.sales.survey.create', compact('prospect'));
+        return view('contractor.survey.create', compact('prospect'));
     }
 
     /**
@@ -35,7 +35,7 @@ class SurveyController extends Controller
         $data = $request->validated();
         $survey = new Survey($data);
         $survey->save();
-        return redirect()->route('advertising.sales.survey.index')->with('success', 'Survey created successfully.');
+        return redirect()->route('contractor.survey.index')->with('success', 'Survey created successfully.');
     }
 
     /**
@@ -45,10 +45,10 @@ class SurveyController extends Controller
     {
         $survey = Survey::with('prospect')->find($id);
         if (!$survey) {
-            return redirect()->route('advertising.sales.survey.index')
+            return redirect()->route('contractor.survey.index')
             ->with('error', 'Survey dengan ID ' . $id . ' tidak ditemukan.');
         }
-        return view('advertising.sales.survey.show', compact('prospect'));
+        return view('contractor.survey.show', compact('prospect'));
     }
 
     /**
@@ -59,10 +59,10 @@ class SurveyController extends Controller
         $survey = Survey::find($id);
         $prospect = Prospect::all();
         if (!$survey) {
-            return redirect()->route('advertising.sales.survey.index')
+            return redirect()->route('contractor.survey.index')
             ->with('error', 'Survey dengan ID ' . $id . ' tidak ditemukan.');
         }
-        return view('advertising.sales.survey.edit', compact('survey', 'prospect'));
+        return view('contractor.survey.edit', compact('survey', 'prospect'));
     }
 
     /**
@@ -72,12 +72,12 @@ class SurveyController extends Controller
     {
         $survey = Survey::find($id);
         if (!$survey) {
-            return redirect()->route('advertising.sales.survey.index')
+            return redirect()->route('contractor.survey.index')
             ->with('error', 'Survey dengan ID ' . $id . ' tidak ditemukan.');
         }
         $data = $request->validated();
         $survey->update($data);
-        return redirect()->route('advertising.sales.survey.index')->with('success', 'Survey updated successfully.');
+        return redirect()->route('contractor.survey.index')->with('success', 'Survey updated successfully.');
     }
 
     /**
@@ -87,10 +87,10 @@ class SurveyController extends Controller
     {
         $survey = Survey::find($id);
         if (!$survey) {
-            return redirect()->route('advertising.sales.survey.index')
+            return redirect()->route('contractor.survey.index')
             ->with('error', 'Survey dengan ID ' . $id . ' tidak ditemukan.');
         }
         $survey->delete();
-        return redirect()->route('advertising.sales.survey.index')->with('success', 'Survey deleted successfully.');
+        return redirect()->route('contractor.survey.index')->with('success', 'Survey deleted successfully.');
     }
 }

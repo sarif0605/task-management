@@ -11,14 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('prospects', function (Blueprint $table) {
+        Schema::create('materials', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('nama_produk', 100)->nullable();
-            $table->date('tanggal');
-            $table->string('pemilik', 100)->nullable();
-            $table->string('lokasi', 200)->nullable();
+            $table->uuid('operational_project_id');
+            $table->foreign('operational_project_id')->references('id')->on('operational_projects');
+            $table->date('tanggal')->nullable();
+            $table->text('pekerjaan');
+            $table->text('material');
+            $table->text('priority');
+            $table->date('for_date');
             $table->text('keterangan');
-            $table->enum('status', ['prospek', 'survey', 'deal'])->default('prospek')->nullable();
             $table->timestamps();
         });
     }
@@ -28,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('prospects');
+        Schema::dropIfExists('materials');
     }
 };

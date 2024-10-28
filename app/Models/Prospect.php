@@ -14,8 +14,7 @@ class Prospect extends Model
     protected $keyType = "string";
     public $incrementing = false;
     public $timestamps = true;
-    protected $fillable = [
-        'name','tanggal','pemilik','lokasi','keterangan'
+    protected $fillable = ['nama_produk', 'tanggal', 'pemilik', 'lokasi','keterangan', 'status'
     ];
 
     public function survey()

@@ -14,7 +14,7 @@ class ProspectController extends Controller
     public function index()
     {
         $prospect = Prospect::orderBy('created_at', 'DESC')->get();
-        return view('prospects.index', compact('prospect'));
+        return view('contractor.prospect.index', compact('prospect'));
     }
 
     /**
@@ -22,7 +22,7 @@ class ProspectController extends Controller
      */
     public function create()
     {
-        return view('advertising.marketing.prospect.create');
+        return view('contractor.prospect.create');
     }
 
     /**
@@ -46,7 +46,7 @@ class ProspectController extends Controller
             return redirect()->route('prospects.index')
             ->with('error', 'Prospect dengan ID ' . $id . ' tidak ditemukan.');
         }
-        return view('prospects.show', compact('prospect'));
+        return view('contractor.prospect.show', compact('prospect'));
     }
 
     /**
@@ -59,7 +59,7 @@ class ProspectController extends Controller
             return redirect()->route('prospects.index')
             ->with('error', 'Prospect dengan ID ' . $id . ' tidak ditemukan.');
         }
-        return view('advertising.marketing.prospect.edit', compact('prospect'));
+        return view('contractor.prospect.edit', compact('prospect'));
     }
 
     /**

@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Survey;
+namespace App\Http\Requests\Opnam;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class SurveyCreateRequest extends FormRequest
+class OpnamCreateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,9 +22,10 @@ class SurveyCreateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'date' => 'required|date',
-            'prospect_id' => 'required|exists:prospects,id',
-            'survey_results' => 'required'
+            'deal_project_id' => 'required|exists:deal_projects,id',
+            'lokasi' => 'required',
+            'pekerjaan' => 'required',
+            'opnams' => 'required',
         ];
     }
 }

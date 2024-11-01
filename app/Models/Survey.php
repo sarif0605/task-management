@@ -21,4 +21,9 @@ class Survey extends Model
     {
         return $this->belongsTo(Prospect::class, 'prospect_id', 'id');
     }
+
+    public function survey_images()
+    {
+        return $this->hasMany(SurveyImages::class, 'survey_id', 'id');
+    }
 }

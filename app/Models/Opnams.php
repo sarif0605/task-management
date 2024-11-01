@@ -10,7 +10,7 @@ class Opnams extends Model
 {
     use HasFactory, HasUlids;
 
-    protected $table = "operational_projects";
+    protected $table = "opnams";
     protected $primaryKey = "id";
     protected $keyType = "string";
     public $incrementing = false;
@@ -18,8 +18,16 @@ class Opnams extends Model
 
     protected $fillable = [
         'deal_project_id',
-        'lokasi',
         'pekerjaan',
-        'opnams',
+        'date',
     ];
+
+    public function kasbon_opnam(){
+        return $this->hasMany(KasbonOpnams::class, 'opnam_id', 'id');
+    }
+
+    public function deal_project()
+    {
+        return $this->belongsTo(DealProject::class, 'deal_project_id', 'id');
+    }
 }

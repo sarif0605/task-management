@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Constructor;
 
 use App\Http\Requests\OperationalProject\OperationalProjectCreateRequest;
 use App\Http\Requests\OperationalProject\OperationalProjectUpdateRequest;
 use App\Models\DealProject;
 use App\Models\OperationalProjects;
-use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 
 class OperationalProjectController extends Controller
 {

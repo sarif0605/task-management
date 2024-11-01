@@ -22,10 +22,13 @@ class DealProjectCreateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'date' => 'required|date',
             'prospect_id' => 'required|exists:prospects,id',
+            'date' => 'required|date',
             'price_quotation' => 'required|numeric',
             'nominal' => 'required|numeric',
+            'lokasi' => 'nullable|string|max:200',
+            'keterangan' => 'required|string',
+            'users' => 'required|array'
         ];
     }
 }

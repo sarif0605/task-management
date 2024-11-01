@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends('layouts.contractor')
 
 @section('title', 'Show Prospect')
 

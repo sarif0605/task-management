@@ -1,13 +1,13 @@
-@extends('layouts.admin')
+@extends('layouts.contractor')
 @section('title', 'Create Prospect')
 @section('content')
-    <h1 class="mb-0">Add Product</h1>
     <hr />
-    <form action="{{ route('prospects.store') }}" method="POST" enctype="multipart/form-data">
+    @include('components.loading')
+    <form id="prospect-form" action="{{ route('prospects.store') }}" method="POST">
         @csrf
         <div class="row mb-3">
             <div class="col">
-                <input type="text" name="name" class="form-control" placeholder="Name">
+                <input type="text" name="nama_produk" class="form-control" placeholder="Name">
             </div>
             <div class="col">
                 <input type="text" name="pemilik" class="form-control" placeholder="Pemilik">
@@ -33,4 +33,7 @@
             </div>
         </div>
     </form>
+    @push('scripts')
+        @include('contractor.prospect.script')
+    @endpush
 @endsection

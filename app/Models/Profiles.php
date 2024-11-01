@@ -10,9 +10,21 @@ class Profiles extends Model
 {
     use HasFactory, HasUlids;
 
-    protected $table = "operational_projects";
+    protected $table = "profiles";
     protected $primaryKey = "id";
     protected $keyType = "string";
     public $incrementing = false;
     public $timestamps = true;
+
+    protected $fillable = [
+        'user_id',
+        'name',
+        'address',
+        'phone',
+        'photo',
+    ];
+
+    public function user(){
+        return $this->belongsTo(User::class, 'user_id');
+    }
 }

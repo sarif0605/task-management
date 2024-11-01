@@ -1,15 +1,13 @@
-//resources/views/products/show.blade.php
-@extends('layouts.admin')
+@extends('layouts.contractor')
 
 @section('title', 'Show Prospect')
 
 @section('content')
-    <h1 class="mb-0">Detail Prospect</h1>
     <hr />
     <div class="row">
         <div class="col mb-3">
             <label class="form-label">Nama</label>
-            <input type="text" name="name" class="form-control" placeholder="Nama" value="{{ $survey->prospect->name }}" readonly>
+            <input type="text" name="name" class="form-control" placeholder="Nama" value="{{ $survey->prospect->nama_produk }}" readonly>
         </div>
         <div class="col mb-3">
             <label class="form-label">Tanggal</label>
@@ -23,4 +21,7 @@
         </div>
     </div>
     </div>
+    @push('scripts')
+        @include('contractor.survey.script')
+    @endpush
 @endsection

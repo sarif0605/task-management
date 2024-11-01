@@ -18,6 +18,8 @@ return new class extends Migration
             $table->date('date');
             $table->decimal('price_quotation', 15, 2);
             $table->decimal('nominal', 15, 2);
+            $table->string('lokasi', 200)->nullable();
+            $table->text('keterangan');
             $table->timestamps();
         });
     }

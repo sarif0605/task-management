@@ -25,9 +25,35 @@
   </li>
 
   <li class="nav-item">
-    <a class="nav-link" href="/profile">
+    <a class="nav-link" href="{{ route('surveys') }}">
       <i class="fas fa-fw fa-tachometer-alt"></i>
-      <span>Profile</span></a>
+      <span>Survey</span></a>
+  </li>
+
+  <li class="nav-item">
+    <a class="nav-link" href="{{ route('deal_projects') }}">
+      <i class="fas fa-fw fa-tachometer-alt"></i>
+      <span>Deal Project</span></a>
+  </li>
+
+  <li class="nav-item">
+    <a class="nav-link" href="{{ route('materials') }}">
+      <i class="fas fa-fw fa-tachometer-alt"></i>
+      <span>Material</span></a>
+  </li>
+
+
+
+  <li class="nav-item">
+    <a class="nav-link" href="{{ route('opnams') }}">
+      <i class="fas fa-fw fa-tachometer-alt"></i>
+      <span>Opnam</span></a>
+  </li>
+
+  <li class="nav-item">
+    <a class="nav-link" href="{{ route('constraints') }}">
+      <i class="fas fa-fw fa-tachometer-alt"></i>
+      <span>Kendala</span></a>
   </li>
 
   <!-- Divider -->

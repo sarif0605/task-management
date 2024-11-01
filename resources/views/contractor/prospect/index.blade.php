@@ -1,57 +1,36 @@
-@extends('layouts.admin')
+@extends('layouts.contractor')
 
 @section('title', 'Home Prospect')
 
 @section('content')
     <div class="d-flex align-items-center justify-content-between">
-        <a href="{{ route('prospects.create') }}" class="btn btn-primary">Add Prospect</a>
+        @if (Auth::user()->position == 'marketing')
+        <a href="{{ route('prospects.create') }}" class="btn btn-primary mb-2"><i class="fa-solid fa-square-plus"></i> Add</a>
+        <form action="/city-import" method="POST" enctype="multipart/form-data">
+        <input type="file" name="file">
+        </form>
+        @endif
     </div>
-    <hr />
-    @if(Session::has('success'))
-        <div class="alert alert-success" role="alert">
-            {{ Session::get('success') }}
-        </div>
-    @endif
-    <table class="table table-hover">
+    <hr class="mb-1" />
+    <table
+        id="table-prospect"
+        class="table table-hover table-striped table-hover text-center"
+      >
         <thead class="table-primary">
-            <tr>
-                <th>#</th>
-                <th>Nama</th>
-                <th>Tanggal</th>
-                <th>Pemilik</th>
-                <th>Lokasi</th>
-                <th>Keterangan</th>
-                <th>Action</th>
-            </tr>
+          <tr>
+            <th>#</th>
+            <th>Nama</th>
+            <th>Tanggal</th>
+            <th>Pemilik</th>
+            <th>Lokasi</th>
+            <th>Keterangan</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
         </thead>
-        <tbody>+
-            @if($prospect->count() > 0)
-                @foreach($prospect as $rs)
-                    <tr>
-                        <td class="align-middle">{{ $loop->iteration }}</td>
-                        <td class="align-middle">{{ $rs->name }}</td>
-                        <td class="align-middle">{{ $rs->tanggal }}</td>
-                        <td class="align-middle">{{ $rs->pemilik }}</td>
-                        <td class="align-middle">{{ $rs->lokasi }}</td>
-                        <td class="align-middle">{{ $rs->keterangan }}</td>
-                        <td class="align-middle">
-                            <div class="btn-group" role="group" aria-label="Basic example">
-                                <a href="{{ route('prospects.show', $rs->id) }}" type="button" class="btn btn-secondary">Detail</a>
-                                <a href="{{ route('prospects.edit', $rs->id)}}" type="button" class="btn btn-warning">Edit</a>
-                                <form action="{{ route('prospects.destroy', $rs->id) }}" method="POST" type="button" class="btn btn-danger p-0" onsubmit="return confirm('Delete?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button class="btn btn-danger m-0">Delete</button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                @endforeach
-            @else
-                <tr>
-                    <td class="text-center" colspan="5">Prospect not found</td>
-                </tr>
-            @endif
-        </tbody>
-    </table>
+      </table>
+
+    @push('scripts')
+        @include('contractor.prospect.script')
+    @endpush
 @endsection

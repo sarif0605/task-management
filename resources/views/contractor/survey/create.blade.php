@@ -1,33 +1,40 @@
-//resources/views/products/create.blade.php
-@extends('layouts.admin')
+@extends('layouts.contractor')
 @section('title', 'Create Surveys')
 @section('content')
-    <hr />
-    <form action="{{ route('prospects.store') }}" method="POST" enctype="multipart/form-data">
-        @csrf
-        <div class="row mb-3">
-            <div class="col">
-                <select name="prospect_id" class="form-control" required>
-                    <option value="" disabled selected>Nama Produk</option>
-                    @foreach ($prospect as $prospect)
-                        <option value="{{ $prospect->id }}">{{ $prospect->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="col">
-                <input type="date" name="date" class="form-control" placeholder="Tanggal">
-            </div>
+<hr />
+@include('components.loading')
+<form id="survey-form" action="{{ route('surveys.store') }}" method="POST" enctype="multipart/form-data">
+    @csrf
+    <div class="row mb-3">
+        <div class="col">
+            <select name="prospect_id" class="form-control" required>
+                <option value="" disabled selected>Nama Produk</option>
+                @foreach ($prospect as $prospect)
+                    <option value="{{ $prospect->id }}">{{ $prospect->nama_produk }}</option>
+                @endforeach
+            </select>
         </div>
-        <div class="row mb-3">
-            <div class="col">
-                <textarea class="form-control" name="survey_results" placeholder="Hasil Survey"></textarea>
-            </div>
+        <div class="col">
+            <input type="date" name="date" class="form-control" placeholder="Tanggal">
         </div>
-
-        <div class="row">
-            <div class="d-grid">
-                <button type="submit" class="btn btn-primary">Submit</button>
-            </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col">
+            <textarea class="form-control" name="survey_results" placeholder="Hasil Survey"></textarea>
         </div>
-    </form>
+    </div>
+    <div class="row mb-3">
+        <div class="col">
+            <input type="file" name="images[]" class="form-control" multiple accept="image/*">
+        </div>
+    </div>
+    <div class="row">
+        <div class="d-grid">
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+    </div>
+</form>
+    @push('scripts')
+        @include('contractor.survey.script')
+    @endpush
 @endsection

@@ -10,17 +10,26 @@ class Constraints extends Model
 {
     use HasFactory, HasUuids;
 
-    protected $table = "operational_projects";
+    protected $table = "constraints";
     protected $primaryKey = "id";
     protected $keyType = "string";
     public $incrementing = false;
     public $timestamps = true;
 
     protected $fillable = [
-        'operational_project_id',
+        'deal_project_id',
         'tanggal',
         'pekerjaan',
         'progress',
         'kendala'
     ];
+
+    public function deal_project()
+    {
+        return $this->belongsTo(DealProject::class, 'deal_project_id', 'id');
+    }
+
+    public function constraint_image() {
+        return $this->hasMany(ConstraintImages::class, 'constraint_id', 'id');
+    }
 }

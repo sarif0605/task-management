@@ -1,18 +1,33 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Constructor;
 
 use App\Http\Requests\Material\MaterialCreateRequest;
 use App\Models\Materials;
-use App\Models\OperationalProjects;
+use App\Http\Controllers\Controller;
+use App\Models\DealProject;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class MaterialController extends Controller
 {
-    public function index()
+
+    public function index(Request $request)
     {
-        $material = Materials::with('operational_project')->orderBy('created_at', 'DESC')->get();
-        return view('contractor.material.index', compact('material'));
+        if ($request->ajax()) {
+            $user = Auth::user();
+            $query = Materials::with(['deal_project.prospect', 'deal_project.deal_project_users']);
+            if ($user->position === 'pengawas') {
+                $query->whereHas('deal_project.deal_project_users', function($q) use ($user) {
+                    $q->where('user_id', $user->id);
+                });
+            }
+            $materials = $query->orderBy('created_at', 'DESC')->get();
+
+            return response()->json(['data' => $materials]);
+        }
+
+        return view('contractor.material.index');
     }
 
     /**
@@ -20,7 +35,7 @@ class MaterialController extends Controller
      */
     public function create()
     {
-        $operationalProject = OperationalProjects::all();
+        $operationalProject = DealProject::all();
         return view('contractor.material.create', compact('operationalProject'));
     }
 
@@ -54,7 +69,7 @@ class MaterialController extends Controller
     public function edit(string $id)
     {
         $material = Materials::find($id);
-        $operationalProject = OperationalProjects::all();
+        $operationalProject = DealProject::all();
         if (!$material) {
             return redirect()->route('contractor.material.index')
             ->with('error', 'Material dengan ID ' . $id . ' tidak ditemukan.');

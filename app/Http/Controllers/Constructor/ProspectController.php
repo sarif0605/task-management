@@ -1,21 +1,37 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Constructor;
 
 use App\Http\Requests\Prospect\ProspectCreateRequest;
 use App\Http\Requests\Prospect\ProspectUpdateRequest;
 use App\Models\Prospect;
+use App\Exports\ProspectExport;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ProspectController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $prospect = Prospect::orderBy('created_at', 'DESC')->get();
-        return view('contractor.prospect.index', compact('prospect'));
+        if ($request->ajax()) {
+            $prospects = Prospect::orderBy('created_at', 'DESC')->get();
+            return response()->json(['data' => $prospects]);
+        }
+
+        return view('contractor.prospect.index');
     }
+
+    public function export()
+    {
+        return Excel::download(new ProspectExport, 'prospects-'. Carbon::now()->timestamp . '.xlsx');
+    }
+
+    //
 
     /**
      * Show the form for creating a new resource.
@@ -30,10 +46,14 @@ class ProspectController extends Controller
      */
     public function store(ProspectCreateRequest $request)
     {
-        $data = $request->validated();
-        $prospect = new Prospect($data);
-        $prospect->save();
-        return redirect()->route('prospects.index')->with('success', 'Prospect created successfully.');
+        try {
+            $data = $request->validated();
+            $prospect = new Prospect($data);
+            $prospect->save();
+            return response()->json(['message' => 'Prospect created successfully.'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to create prospect: '.$e->getMessage()], 500);
+        }
     }
 
     /**
@@ -43,7 +63,7 @@ class ProspectController extends Controller
     {
         $prospect = Prospect::find($id);
         if (!$prospect) {
-            return redirect()->route('prospects.index')
+            return redirect()->route('prospects')
             ->with('error', 'Prospect dengan ID ' . $id . ' tidak ditemukan.');
         }
         return view('contractor.prospect.show', compact('prospect'));
@@ -56,7 +76,7 @@ class ProspectController extends Controller
     {
         $prospect = Prospect::find($id);
         if (!$prospect) {
-            return redirect()->route('prospects.index')
+            return redirect()->route('prospects')
             ->with('error', 'Prospect dengan ID ' . $id . ' tidak ditemukan.');
         }
         return view('contractor.prospect.edit', compact('prospect'));
@@ -69,25 +89,24 @@ class ProspectController extends Controller
     {
         $prospect = Prospect::find($id);
         if (!$prospect) {
-            return redirect()->route('prospects.index')
+            return redirect()->route('prospects')
             ->with('error', 'Prospect dengan ID ' . $id . ' tidak ditemukan.');
         }
         $data = $request->validated();
         $prospect->update($data);
-        return redirect()->route('prospects.index')->with('success', 'Prospect updated successfully.');
+        return redirect()->route('prospects')->with('success', 'Prospect updated successfully.');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy($id)
     {
         $prospect = Prospect::find($id);
         if (!$prospect) {
-            return redirect()->route('prospects.index')
-            ->with('error', 'Prospect dengan ID ' . $id . ' tidak ditemukan.');
+            return response()->json(['message' => 'Prospect not found'], 404);
         }
         $prospect->delete();
-        return redirect()->route('prospects.index')->with('success', 'Prospect deleted successfully.');
+        return response()->json(['message' => 'Prospect deleted successfully'], 200);
     }
 }

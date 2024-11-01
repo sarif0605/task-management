@@ -16,4 +16,9 @@ class SurveyImages extends Model
     public $incrementing = false;
     public $timestamps = true;
     protected $fillable = ['survey_id', 'image_link'];
+
+    public function survey()
+    {
+        return $this->belongsTo(Survey::class, 'survey_id', 'id');
+    }
 }

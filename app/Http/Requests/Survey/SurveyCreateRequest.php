@@ -24,7 +24,8 @@ class SurveyCreateRequest extends FormRequest
         return [
             'date' => 'required|date',
             'prospect_id' => 'required|exists:prospects,id',
-            'survey_results' => 'required'
+            'survey_results' => 'required',
+            'images' => 'nullable|image|max:5120',
         ];
     }
 }

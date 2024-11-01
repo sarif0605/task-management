@@ -22,7 +22,7 @@ class ProspectCreateRequest extends FormRequest
     public function rules(): array
     {
         return [
-             'name' => 'required',
+             'nama_produk' => 'required',
              'tanggal' => 'required|date',
              'pemilik' => 'required',
              'lokasi' => 'required',

@@ -1,17 +1,17 @@
-@extends('layouts.admin')
+@extends('layouts.contractor')
 
 @section('title', 'Edit Product')
 
 @section('content')
-    <h1 class="mb-0">Edit Prospect</h1>
-    <hr /> 'name','tanggal','pemilik','lokasi','keterangan'
-    <form action="{{ route('prospects.update', $prospect->id) }}" method="POST">
+    <hr />
+    @include('components.loading')
+    <form id="prospect-form-edit" action="{{ route('prospects.update', $prospect->id) }}" method="POST">
         @csrf
         @method('PUT')
         <div class="row">
             <div class="col mb-3">
                 <label class="form-label">Nama</label>
-                <input type="text" name="name" class="form-control" placeholder="Name" value="{{ $prospect->name }}" >
+                <input type="text" name="nama_produk" class="form-control" placeholder="Name" value="{{ $prospect->nama_produk }}" >
             </div>
             <div class="col mb-3">
                 <label class="form-label">Pemilik</label>
@@ -40,4 +40,7 @@
             </div>
         </div>
     </form>
+    @push('scripts')
+        @include('contractor.prospect.script')
+    @endpush
 @endsection

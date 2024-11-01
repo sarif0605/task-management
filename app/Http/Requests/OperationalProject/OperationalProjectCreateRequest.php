@@ -22,7 +22,6 @@ class OperationalProjectCreateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'date' => 'required|date',
             'deal_project_id' => 'required|exists:deal_projects,id',
             'lokasi' => 'required',
             'keterangan' => 'required'

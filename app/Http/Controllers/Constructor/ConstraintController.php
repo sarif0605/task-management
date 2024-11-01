@@ -1,20 +1,32 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Constructor;
 
 use App\Http\Requests\Constraint\ConstraintCreateRequest;
 use App\Http\Requests\Constraint\ConstraintUpdateRequest;
 use App\Models\Constraints;
 use App\Models\OperationalProjects;
+use App\Http\Controllers\Controller;
+use App\Models\DealProject;
 use Illuminate\Http\Request;
-use PHPUnit\Framework\Constraint\Constraint;
+use Illuminate\Support\Facades\Auth;
 
 class ConstraintController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $constraint = Constraints::with('operational_project')->orderBy('created_at', 'DESC')->get();
-        return view('contractor.material.index', compact('constraint'));
+        if ($request->ajax()) {
+            $user = Auth::user();
+            $query = Constraints::with(['deal_project.prospect', 'deal_project.deal_project_users']);
+            if ($user->position === 'pengawas') {
+                $query->whereHas('deal_project.deal_project_users', function($q) use ($user) {
+                    $q->where('user_id', $user->id);
+                });
+            }
+            $materials = $query->orderBy('created_at', 'DESC')->get();
+            return response()->json(['data' => $materials]);
+        }
+        return view('contractor.constraint.index');
     }
 
     /**
@@ -22,7 +34,7 @@ class ConstraintController extends Controller
      */
     public function create()
     {
-        $operationalProject = OperationalProjects::all();
+        $operationalProject = DealProject::all();
         return view('contractor.contraint.create', compact('operationalProject'));
     }
 
@@ -56,7 +68,7 @@ class ConstraintController extends Controller
     public function edit(string $id)
     {
         $constraint = Constraints::find($id);
-        $operationalProject = OperationalProjects::all();
+        $operationalProject = DealProject::all();
         if (!$constraint) {
             return redirect()->route('contractor.contraint.index')
             ->with('error', 'Constraint dengan ID ' . $id . ' tidak ditemukan.');

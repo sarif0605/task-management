@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends('layouts.contractor')
 
 @section('title', 'Show Deal Project')
 
@@ -6,6 +6,7 @@
     <h1 class="mb-0">Detail Prospect</h1>
     <hr />
     <div class="row">
+        <!-- Detail Fields -->
         <div class="col mb-3">
             <label class="form-label">Nama Produk</label>
             <input type="text" name="prospect_id" class="form-control" placeholder="Nama" value="{{ $dealProject->prospect->name }}" readonly>
@@ -25,5 +26,6 @@
             <input type="number" name="nominal" class="form-control" placeholder="Penawaran Harga" value="{{ $dealProject->nominal }}" readonly>
         </div>
     </div>
-    </div>
+    <!-- Button to Create Page -->
+    <a href="{{ route('create_project', ['deal_project_id' => $dealProject->id]) }}" class="btn btn-primary">Tambah Data Opnams, Materials, dan Constraints</a>
 @endsection

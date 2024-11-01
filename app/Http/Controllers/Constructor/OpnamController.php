@@ -1,19 +1,32 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Constructor;
 
 use App\Http\Requests\Opnam\OpnamCreateRequest;
 use App\Http\Requests\Opnam\OpnamUpdateRequest;
 use App\Models\OperationalProjects;
 use App\Models\Opnams;
+use App\Http\Controllers\Controller;
+use App\Models\DealProject;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class OpnamController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $opnam = Opnams::with('operational_project')->orderBy('created_at', 'DESC')->get();
-        return view('contractor.opnam.index', compact('material'));
+        if ($request->ajax()) {
+            $user = Auth::user();
+            $query = Opnams::with(['deal_project.prospect', 'deal_project.deal_project_users']);
+            if ($user->position === 'pengawas') {
+                $query->whereHas('deal_project.deal_project_users', function($q) use ($user) {
+                    $q->where('user_id', $user->id);
+                });
+            }
+            $materials = $query->orderBy('created_at', 'DESC')->get();
+            return response()->json(['data' => $materials]);
+        }
+        return view('contractor.opnam.index');
     }
 
     /**
@@ -21,8 +34,8 @@ class OpnamController extends Controller
      */
     public function create()
     {
-        $operationalProject = OperationalProjects::all();
-        return view('contractor.material.create', compact('operationalProject'));
+        $operationalProject = DealProject::all();
+        return view('contractor.opnam.create', compact('operationalProject'));
     }
 
     /**
@@ -55,9 +68,9 @@ class OpnamController extends Controller
     public function edit(string $id)
     {
         $opnam = Opnams::find($id);
-        $operationalProject = OperationalProjects::all();
+        $operationalProject = DealProject::all();
         if (!$opnam) {
-            return redirect()->route('contractor.opnam.index')
+            return redirect()->route('contractor')
             ->with('error', 'Opnam dengan ID ' . $id . ' tidak ditemukan.');
         }
         return view('contractor.opnam.edit', compact('material', 'operationalProject'));

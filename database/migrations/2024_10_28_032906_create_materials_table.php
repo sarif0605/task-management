@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('materials', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('operational_project_id');
-            $table->foreign('operational_project_id')->references('id')->on('operational_projects');
+            $table->uuid('deal_project_id');
+            $table->foreign('deal_project_id')->references('id')->on('deal_projects')->onDelete('cascade')->onUpdate('cascade');
             $table->date('tanggal')->nullable();
             $table->text('pekerjaan');
             $table->text('material');

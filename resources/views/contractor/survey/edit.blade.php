@@ -1,12 +1,11 @@
-//resources/views/products/edit.blade.php
-@extends('layouts.admin')
+@extends('layouts.contractor')
 
 @section('title', 'Edit Product')
 
 @section('content')
-    <h1 class="mb-0">Edit Prospect</h1>
     <hr />
-    <form action="{{ route('surveys.update', $survey->id) }}" method="POST">
+    @include('components.loading')
+    <form id="survey-form-edit" action="{{ route('surveys.update', $survey->id) }}" method="POST">
         @csrf
         @method('PUT')
         <div class="row">
@@ -15,7 +14,7 @@
                 <select name="prospect_id" class="form-control" required>
                     @foreach ($prospect as $prospect)
                         <option value="{{ $prospect->id }}" {{ $prospect->id == $survey->prospect_id ? 'selected' : '' }}>
-                            {{ $prospect->name }}
+                            {{ $prospect->nama_produk }}
                         </option>
                     @endforeach
                 </select>
@@ -37,4 +36,7 @@
             </div>
         </div>
     </form>
+    @push('scripts')
+        @include('contractor.survey.script')
+    @endpush
 @endsection

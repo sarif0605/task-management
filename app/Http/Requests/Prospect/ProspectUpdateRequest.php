@@ -22,7 +22,7 @@ class ProspectUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-             'name' => 'nullable',
+             'nama_produk' => 'nullable',
              'tanggal' => 'nullable|date',
              'pemilik' => 'nullable',
              'lokasi' => 'nullable',

@@ -11,7 +11,7 @@ use Spatie\Permission\Models\Role;
 class RolePermissionSeeder extends Seeder
 {
     public function run(): void{
-        $roles = ['kontraktor', 'interior', 'advertising', 'catering', 'travel'];
+        $roles = ['kontraktor', 'interior', 'advertising', 'catering', 'travel', 'admin'];
         foreach ($roles as $role) {
             Role::create(['name' => $role]);
         }

@@ -15,10 +15,12 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->uuid('user_id');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
-            $table->string('name');
+            $table->string('name', 100);
+            $table->string('nik', 16);
+            $table->date('birth_date');
             $table->string('address');
-            $table->string('phone');
-            $table->string('photo');
+            $table->string('phone', 20);
+            $table->string('foto');
             $table->timestamps();
         });
     }

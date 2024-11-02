@@ -44,14 +44,18 @@ class ProfileController extends Controller
         $profileData = Profiles::updateOrCreate(
             ['user_id' => $currentUser->id],
             [
-                'age' => $data['age'],
+                'name' => $data['name'],
+                'nik' => $data['nik'],
+                'birth_date' => $data['birth_date'],
                 'address' => $data['address'],
-                'biodata' => $data['biodata'],
+                'phone' => $data['phone'],
+                'foto' => $data['foto'],
                 'user_id' => $currentUser->id,
             ]
         );
+        $currentUser = $data['email'];
         $profileData->save();
-
+        $currentUser->save();
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
 

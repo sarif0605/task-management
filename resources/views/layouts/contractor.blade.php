@@ -76,6 +76,7 @@
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
         <!-- Stack for additional scripts -->
+        @yield('js')
         @stack('scripts')
     </body>
 </html>

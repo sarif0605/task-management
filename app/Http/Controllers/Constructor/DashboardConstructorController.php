@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers\Constructor;
 
-use App\Charts\StatusProspectChart;
+use App\Charts\ProspectChart;
 use App\Http\Controllers\Controller;
 use App\Models\Prospect;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
 
 class DashboardConstructorController extends Controller
 {
@@ -43,26 +42,27 @@ class DashboardConstructorController extends Controller
         ]);
     }
 
-    public function showChart(Request $request)
+    public function dashboard(ProspectChart $chart)
     {
-        // Get the specified year or default to the current year
-        $year = $request->input('year', Carbon::now()->year);
-
-        // Retrieve prospect data, grouped by status for the specified year
-        $prospects = Prospect::whereYear('tanggal', $year)
-            ->selectRaw('status, COUNT(*) as count')
-            ->groupBy('status')
-            ->get();
-
-        // Define the labels and initialize counts to zero for each status
-        $statusLabels = ['prospek', 'survey', 'deal'];
-        $statusCounts = array_fill_keys($statusLabels, 0);
-        foreach ($prospects as $prospect) {
-            $statusCounts[$prospect->status] = $prospect->count;
+        $selectedYear = request('year', date('Y'));
+        if (!is_numeric($selectedYear) || $selectedYear < 1900 || $selectedYear > 2100) {
+            $selectedYear = date('Y');
         }
-        return view('contractor.index', [
-            'statusCounts' => $statusCounts,
-            'year' => $year,
-        ]);
+        $currentMonth = Carbon::now()->month;
+        $data['countProspek'] = Prospect::whereYear('created_at', $selectedYear)
+            ->whereMonth('created_at', $currentMonth)
+            ->where('status', 'prospek')
+            ->count();
+        $data['countSurvey'] = Prospect::whereYear('created_at', $selectedYear)
+            ->whereMonth('created_at', $currentMonth)
+            ->where('status', 'survey')
+            ->count();
+        $data['countDeal'] = Prospect::whereYear('created_at', $selectedYear)
+            ->whereMonth('created_at', $currentMonth)
+            ->where('status', 'deal')
+            ->count();
+        $data['selectedYear'] = $selectedYear;
+        $data['chart'] = $chart->setYear($selectedYear)->build();
+        return view('contractor.index', $data);
     }
 }

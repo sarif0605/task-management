@@ -11,6 +11,11 @@ use App\Models\Opnams;
 
 class OpnamMaterialConstraintController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(['isVerificationAccount', 'isStatusAccount'])->only('createProject', 'storeProjectData');
+    }
+
     public function createProject($deal_project_id)
     {
         return view('contractor.opnam_material_constraint.create', compact('deal_project_id'));

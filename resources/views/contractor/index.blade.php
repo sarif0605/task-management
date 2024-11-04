@@ -1,40 +1,9 @@
 @extends('layouts.contractor')
 @section('title', 'Dashboard - Laravel Admin Panel With Login and Registration')
-@section('js')
-    <script src="{{ $chart->cdn() }}"></script>
-    {{ $chart->script() }}
-
-    <script>
-    $(document).ready(function() {
-        // Handle form submission
-        $('#yearForm').submit(function(e) {
-            e.preventDefault();
-            var year = $('#yearInput').val();
-
-            // Validate year
-            if(year < 1900 || year > 2100) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Invalid Year',
-                    text: 'Please enter a valid year between 1900 and 2100'
-                });
-                return false;
-            }
-
-            // Redirect with year parameter
-            window.location.href = "{{ route('dashboard') }}?year=" + year;
-        });
-
-        // Initialize year input with current value
-        $('#yearInput').val("{{ $selectedYear }}");
-    });
-    </script>
-@endsection
-
 @section('content')
 <div class="container-fluid">
     <!-- Year Input Section -->
-    <div class="row mb-4">
+    {{-- <div class="row mb-4">
         <div class="col-md-6">
             <div class="card shadow-sm">
                 <div class="card-body">
@@ -60,7 +29,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> --}}
 
     <!-- Stats Cards Row -->
     <div class="row">
@@ -120,7 +89,7 @@
     </div>
 
     <!-- Chart Row -->
-    <div class="row">
+    {{-- <div class="row">
         <div class="col-xl-12">
             <div class="card shadow mb-4">
                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
@@ -131,7 +100,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> --}}
 </div>
 @endsection
 

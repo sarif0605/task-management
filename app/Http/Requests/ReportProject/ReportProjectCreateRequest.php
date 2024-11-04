@@ -1,17 +1,17 @@
 <?php
 
-namespace App\Http\Requests\OperationalProject;
+namespace App\Http\Requests\ReportProject;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class OperationalProjectUpdateRequest extends FormRequest
+class ReportProjectCreateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return true;
+        return false;
     }
 
     /**
@@ -22,9 +22,7 @@ class OperationalProjectUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'deal_project_id' => 'nullable|exists:deal_projects,id',
-            'lokasi' => 'nullable',
-            'keterangan' => 'nullable'
+            //
         ];
     }
 }

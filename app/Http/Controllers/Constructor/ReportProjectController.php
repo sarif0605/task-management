@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers\Constructor;
 
-use App\Http\Requests\Material\MaterialCreateRequest;
-use App\Models\Materials;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ReportProject\ReportProjectCreateRequest;
+use App\Http\Requests\ReportProject\ReportProjectUpdateRequest;
 use App\Models\DealProject;
+use App\Models\ReportProject;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class MaterialController extends Controller
+class ReportProjectController extends Controller
 {
-
     public function __construct()
     {
         $this->middleware(['isVerificationAccount', 'isStatusAccount'])->only('store', 'create', 'edit', 'update', 'destroy');
@@ -21,7 +21,7 @@ class MaterialController extends Controller
     {
         if ($request->ajax()) {
             $user = Auth::user();
-            $query = Materials::with(['deal_project.prospect', 'deal_project.deal_project_users']);
+            $query = ReportProject::with(['deal_project.prospect', 'deal_project.deal_project_users']);
             if ($user->position === 'pengawas') {
                 $query->whereHas('deal_project.deal_project_users', function($q) use ($user) {
                     $q->where('user_id', $user->id);
@@ -47,10 +47,10 @@ class MaterialController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(MaterialCreateRequest $request)
+    public function store(ReportProjectCreateRequest $request)
     {
         $data = $request->validated();
-        $material = new Materials($data);
+        $material = new ReportProject($data);
         $material->save();
         return redirect()->route('contractor.material.index')->with('success', 'Material created successfully.');
     }
@@ -60,7 +60,7 @@ class MaterialController extends Controller
      */
     public function show(string $id)
     {
-        $material = Materials::with('operational_project')->find($id);
+        $material = ReportProject::with('operational_project')->find($id);
         if (!$material) {
             return redirect()->route('contractor.material.index')
             ->with('error', 'Material dengan ID ' . $id . ' tidak ditemukan.');
@@ -73,7 +73,7 @@ class MaterialController extends Controller
      */
     public function edit(string $id)
     {
-        $material = Materials::find($id);
+        $material = ReportProject::find($id);
         $operationalProject = DealProject::all();
         if (!$material) {
             return redirect()->route('contractor.material.index')
@@ -85,9 +85,9 @@ class MaterialController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(MaterialCreateRequest $request, string $id)
+    public function update(ReportProjectUpdateRequest $request, string $id)
     {
-        $material = Materials::find($id);
+        $material = ReportProject::find($id);
         if (!$material) {
             return redirect()->route('contractor.material.index')
             ->with('error', 'Material dengan ID ' . $id . ' tidak ditemukan.');
@@ -102,7 +102,7 @@ class MaterialController extends Controller
      */
     public function destroy(string $id)
     {
-        $material = Materials::find($id);
+        $material = ReportProject::find($id);
         if (!$material) {
             return redirect()->route('contractor.material.index')
             ->with('error', 'Material dengan ID ' . $id . ' tidak ditemukan.');

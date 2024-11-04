@@ -37,12 +37,16 @@
   </li>
 
   <li class="nav-item">
+    <a class="nav-link" href="{{ route('report_projects') }}">
+      <i class="fas fa-fw fa-tachometer-alt"></i>
+      <span>Report Project</span></a>
+  </li>
+
+  <li class="nav-item">
     <a class="nav-link" href="{{ route('materials') }}">
       <i class="fas fa-fw fa-tachometer-alt"></i>
       <span>Material</span></a>
   </li>
-
-
 
   <li class="nav-item">
     <a class="nav-link" href="{{ route('opnams') }}">
@@ -56,10 +60,8 @@
       <span>Kendala</span></a>
   </li>
 
-  <!-- Divider -->
   <hr class="sidebar-divider d-none d-md-block">
 
-  <!-- Sidebar Toggler (Sidebar) -->
   <div class="text-center d-none d-md-inline">
     <button class="rounded-circle border-0" id="sidebarToggle"></button>
   </div>

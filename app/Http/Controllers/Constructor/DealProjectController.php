@@ -5,8 +5,6 @@ namespace App\Http\Controllers\Constructor;
 use App\Http\Requests\DealProject\DealProjectCreateRequest;
 use App\Http\Requests\DealProject\DealProjectUpdateRequest;
 use App\Models\DealProject;
-use App\Models\OperationalProjects;
-use App\Models\OperationalProjectUsers;
 use App\Models\Prospect;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -20,6 +18,11 @@ class DealProjectController extends Controller
     /**
      * Display a listing of the resource.
      */
+
+     public function __construct()
+    {
+        $this->middleware(['isVerificationAccount', 'isStatusAccount'])->only('store', 'create', 'edit', 'update', 'destroy');
+    }
 
      public function index(Request $request)
      {

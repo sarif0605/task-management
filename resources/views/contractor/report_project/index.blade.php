@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="d-flex align-items-center justify-content-between mb-2">
-        @if (Auth::user()->position == 'sales' || Auth::user()->position == 'admin')
+        @if (Auth::user()->position == 'sales')
             <a href="{{ route('deal_projects.create') }}" class="btn btn-primary"><i class="fa-solid fa-square-plus"></i> Add</a>
         @endif
     </div>

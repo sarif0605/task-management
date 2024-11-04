@@ -17,7 +17,7 @@ class Materials extends Model
     public $timestamps = true;
 
     protected $fillable = [
-        'deal_project_id',
+        'report_project_id',
         'tanggal',
         'pekerjaan',
         'material',
@@ -26,9 +26,9 @@ class Materials extends Model
         'keterangan',
     ];
 
-    public function deal_project()
+    public function report_project()
     {
-        return $this->belongsTo(DealProject::class, 'deal_project_id', 'id');
+        return $this->belongsTo(ReportProject::class, 'report_project_id', 'id');
     }
 
 }

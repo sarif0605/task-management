@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Constructor\ConstraintController;
 use App\Http\Controllers\Constructor\DashboardConstructorController;
 use App\Http\Controllers\Constructor\DealProjectController;
@@ -7,6 +8,7 @@ use App\Http\Controllers\Constructor\MaterialController;
 use App\Http\Controllers\Constructor\OpnamController;
 use App\Http\Controllers\Constructor\OpnamMaterialConstraintController;
 use App\Http\Controllers\Constructor\ProspectController;
+use App\Http\Controllers\Constructor\ReportProjectController;
 use App\Http\Controllers\Constructor\SurveyController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -26,9 +28,13 @@ Route::get('/', function () {
     return view('auth.login');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/register', function () {
+    return view('auth.register');
+});
+
+Route::get('/verifikasi', [AuthController::class, 'verifikasiView'])->name('verifikasi');
+Route::post('/verifikasiOtp', [AuthController::class, 'verifikasi'])->name('verifikasi');
+Route::post('/generate', [AuthController::class, 'generateOtpCode'])->name('generate');
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardConstructorController::class, 'index'])->name('dashboard');
@@ -96,13 +102,23 @@ Route::middleware('auth')->group(function () {
         Route::delete('destroy/{id}', 'destroy')->name('deal_projects.destroy');
     });
 
+    Route::controller(ReportProjectController::class)->prefix('report_projects')->group(function () {
+        Route::get('', 'index')->name('report_projects');
+        Route::get('create', 'create')->name('report_projects.create');
+        Route::post('store', 'store')->name('report_projects.store');
+        Route::get('show/{id}', 'show')->name('report_projects.show');
+        Route::get('edit/{id}', 'edit')->name('report_projects.edit');
+        Route::put('edit/{id}', 'update')->name('report_projects.update');
+        Route::delete('destroy/{id}', 'destroy')->name('report_projects.destroy');
+    });
+
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::get('/admin', function() {
-    return '<h1>Hello Admin</h1>';
-})->middleware(['auth', 'verified', 'role:admin']);
+// Route::get('/admin', function() {
+//     return '<h1>Hello Admin</h1>';
+// })->middleware(['auth', 'verified', 'role:admin']);
 
 require __DIR__.'/auth.php';

@@ -37,7 +37,7 @@ $(document).ready(function () {
                 orderable: false,
                 searchable: false,
                 render: function (data) {
-                    if (userPosition === "marketing") {
+                    if (userPosition === "marketing" || userPosition === "admin") {
                         return `
                             <a href="/prospects/show/${data.id}" class="btn btn-secondary"><i class="fa-solid fa-circle-info"></i></a>
                             <a href="/prospects/edit/${data.id}" class="btn btn-warning"><i class="fa-solid fa-pen-to-square"></i></a>

@@ -13,6 +13,12 @@ use Illuminate\Support\Facades\Auth;
 
 class OpnamController extends Controller
 {
+
+    public function __construct()
+    {
+        $this->middleware(['isVerificationAccount', 'isStatusAccount'])->only('store', 'create', 'edit', 'update', 'destroy');
+    }
+
     public function index(Request $request)
     {
         if ($request->ajax()) {

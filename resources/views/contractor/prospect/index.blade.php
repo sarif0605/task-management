@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="d-flex align-items-center justify-content-between">
-        @if (Auth::user()->position == 'marketing')
+        @if (Auth::user()->position == 'marketing' || Auth::user()->position == 'admin')
         <a href="{{ route('prospects.create') }}" class="btn btn-primary mb-2"><i class="fa-solid fa-square-plus"></i> Add</a>
         <form action="/city-import" method="POST" enctype="multipart/form-data">
         <input type="file" name="file">

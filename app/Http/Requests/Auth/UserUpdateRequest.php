@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\OperationalProject;
+namespace App\Http\Requests\Auth;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class OperationalProjectCreateRequest extends FormRequest
+class UserUpdateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,9 +22,9 @@ class OperationalProjectCreateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'deal_project_id' => 'required|exists:deal_projects,id',
-            'lokasi' => 'required',
-            'keterangan' => 'required'
+            'status_account' => ['nullable'],
+            'email_verified_at' => ['nullable'],
+            'position' => ['nullable'],
         ];
     }
 }

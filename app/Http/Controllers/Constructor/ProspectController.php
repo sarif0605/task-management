@@ -13,6 +13,11 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class ProspectController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(['isVerificationAccount', 'isStatusAccount'])->only('store', 'create', 'edit', 'update', 'destroy');
+    }
+
     /**
      * Display a listing of the resource.
      */

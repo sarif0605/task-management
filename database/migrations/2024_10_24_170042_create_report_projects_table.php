@@ -12,7 +12,13 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->uuid('deal_project_id');
             $table->foreign('deal_project_id')->references('id')->on('deal_projects')->onDelete('cascade')->onUpdate('cascade');
-            $table->enum('status', ['belum', 'sudah'])->default('belum')->nullable();
+            $table->enum('status', ['plan', 'mulai', 'selesai', 'belum'])->default('plan')->nullable();
+            $table->date('start_date');
+            $table->date('end_date');
+            $table->float('bobot');
+            $table->date('progress');
+            $table->string('durasi', 5);
+            $table->float('harian');
             $table->timestamps();
         });
     }

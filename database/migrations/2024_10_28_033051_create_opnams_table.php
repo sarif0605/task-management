@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('opnams', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('deal_project_id');
-            $table->foreign('deal_project_id')->references('id')->on('deal_projects')->onDelete('cascade')->onUpdate('cascade');
+            $table->uuid('report_project_id');
+            $table->foreign('report_project_id')->references('id')->on('report_projects')->onDelete('cascade')->onUpdate('cascade');
             $table->date('date');
             $table->text('pekerjaan');
             $table->timestamps();

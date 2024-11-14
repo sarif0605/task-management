@@ -26,4 +26,9 @@ class Prospect extends Model
     {
         return $this->hasMany(DealProject::class, 'prospect_id', 'id');
     }
+
+    public function penawaran_project()
+    {
+        return $this->hasMany(PenawaranProject::class, 'prospect_id', 'id');
+    }
 }

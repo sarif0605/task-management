@@ -5,11 +5,11 @@ namespace App\Http\Controllers\Constructor;
 use App\Http\Requests\Constraint\ConstraintCreateRequest;
 use App\Http\Requests\Constraint\ConstraintUpdateRequest;
 use App\Models\Constraints;
-use App\Models\OperationalProjects;
 use App\Http\Controllers\Controller;
 use App\Models\DealProject;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ConstraintController extends Controller
 {
@@ -23,9 +23,12 @@ class ConstraintController extends Controller
     {
         if ($request->ajax()) {
             $user = Auth::user();
-            $query = Constraints::with(['deal_project.prospect', 'deal_project.deal_project_users']);
+            $query = Constraints::with([
+                'report_project.deal_project.prospect',
+                'report_project.deal_project.deal_project_users'
+            ]);
             if ($user->position === 'pengawas') {
-                $query->whereHas('deal_project.deal_project_users', function($q) use ($user) {
+                $query->whereHas('report_project.deal_project.deal_project_users', function($q) use ($user) {
                     $q->where('user_id', $user->id);
                 });
             }
@@ -38,10 +41,9 @@ class ConstraintController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create($report_project_id)
     {
-        $operationalProject = DealProject::all();
-        return view('contractor.contraint.create', compact('operationalProject'));
+        return view('contractor.constraint.create', compact('report_project_id'));
     }
 
     /**
@@ -49,10 +51,25 @@ class ConstraintController extends Controller
      */
     public function store(ConstraintCreateRequest $request)
     {
-        $data = $request->validated();
-        $constraint = new Constraints($data);
-        $constraint->save();
-        return redirect()->route('contractor.contraint.index')->with('success', 'Constraint created successfully.');
+        try {
+            DB::beginTransaction();
+            $data = $request->validated();
+            foreach ($data['entries'] as $entry) {
+                Constraints::create([
+                    'report_project_id' => $data['report_project_id'],
+                    'tanggal' => $entry['tanggal'],
+                    'pekerjaan' => $entry['pekerjaan'],
+                    'progress' => $entry['progress'],
+                    'kendala' => $entry['kendala'],
+                    ]);
+            }
+            DB::commit();
+                return redirect()->route('constraints')->with('success', 'Project entries created successfully');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Error creating project entries. Please try again.')->withInput();
+        }
+        return redirect()->route('constraints')->with('success', 'Material created successfully.');
     }
 
     /**
@@ -62,10 +79,10 @@ class ConstraintController extends Controller
     {
         $constraint = Constraints::with('operational_project')->find($id);
         if (!$constraint) {
-            return redirect()->route('contractor.contraint.index')
+            return redirect()->route('constraints')
             ->with('error', 'Constraint dengan ID ' . $id . ' tidak ditemukan.');
         }
-        return view('contractor.contraint.show', compact('prospect'));
+        return view('contractor.constraint.show', compact('prospect'));
     }
 
     /**
@@ -76,10 +93,10 @@ class ConstraintController extends Controller
         $constraint = Constraints::find($id);
         $operationalProject = DealProject::all();
         if (!$constraint) {
-            return redirect()->route('contractor.contraint.index')
+            return redirect()->route('constraints')
             ->with('error', 'Constraint dengan ID ' . $id . ' tidak ditemukan.');
         }
-        return view('contractor.contraint.edit', compact('material', 'operationalProject'));
+        return view('contractor.constraint.edit', compact('material', 'operationalProject'));
     }
 
     /**
@@ -89,12 +106,12 @@ class ConstraintController extends Controller
     {
         $constraint = Constraints::find($id);
         if (!$constraint) {
-            return redirect()->route('contractor.contraint.index')
+            return redirect()->route('constraints')
             ->with('error', 'Constraint dengan ID ' . $id . ' tidak ditemukan.');
         }
         $data = $request->validated();
         $constraint->update($data);
-        return redirect()->route('contractor.contraint.index')->with('success', 'Constraint updated successfully.');
+        return redirect()->route('constraints')->with('success', 'Constraint updated successfully.');
     }
 
     /**
@@ -104,10 +121,10 @@ class ConstraintController extends Controller
     {
         $constraint = Constraints::find($id);
         if (!$constraint) {
-            return redirect()->route('contractor.contraint.index')
+            return redirect()->route('constraints')
             ->with('error', 'Constraint dengan ID ' . $id . ' tidak ditemukan.');
         }
         $constraint->delete();
-        return redirect()->route('contractor.contraint.index')->with('success', 'Constraint deleted successfully.');
+        return redirect()->route('constraints')->with('success', 'Constraint deleted successfully.');
     }
 }

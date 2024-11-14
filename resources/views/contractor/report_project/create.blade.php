@@ -1,96 +1,96 @@
 @extends('layouts.contractor')
-@section('title', 'CreateProject Deal')
+
+@section('title', 'Create Project Report')
+
 @section('content')
-<div class="container">
-    <form action="{{ route('deal_projects.store') }}" method="POST">
+    <form id="report-form" action="{{ route('report_projects.store') }}" method="POST">
         @csrf
-        <div class="row mb-3">
-            <div class="col">
-                <select name="prospect_id" class="form-control" required>
-                    <option value="" disabled selected>Nama Produk</option>
-                    @foreach ($prospect as $prospect)
-                        <option value="{{ $prospect->id }}">{{ $prospect->nama_produk }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="col">
-                <input type="date" name="date" class="form-control" placeholder="Tanggal">
+        <input type="hidden" name="deal_project_id" value="{{ $deal_project_id }}">
+        <div id="project-entries">
+            <div class="project-entry border p-3 mb-3 rounded">
+                <div class="row mb-3">
+                    <div class="col">
+                        <label class="form-label">Status</label>
+                        <select name="entries[0][status]" class="form-control" required>
+                            <option value="" disabled selected>Status</option>
+                            <option value="belum">Belum</option>
+                            <option value="mulai">Mulai</option>
+                            <option value="selesai">Selesai</option>
+                        </select>
+                    </div>
+                    <div class="col">
+                        <label class="form-label">Start Date</label>
+                        <input type="date" name="entries[0][start_date]" class="form-control" required>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col">
+                        <label class="form-label">End Date</label>
+                        <input type="date" name="entries[0][end_date]" class="form-control" required>
+                    </div>
+                    <div class="col">
+                        <label class="form-label">Bobot</label>
+                        <input type="number" name="entries[0][bobot]" step="0.01" class="form-control" placeholder="Enter bobot" required>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col">
+                        <label class="form-label">Progress</label>
+                        <input type="number" name="entries[0][progress]" class="form-control" placeholder="Enter progress" required>
+                    </div>
+                    <div class="col">
+                        <label class="form-label">Durasi</label>
+                        <input type="number" name="entries[0][durasi]" step="0.01" class="form-control" placeholder="Enter durasi" required>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col">
+                        <label class="form-label">Harian</label>
+                        <input type="number" name="entries[0][harian]" step="0.01" class="form-control" placeholder="Enter harian" required>
+                    </div>
+                    <div class="col d-flex align-items-end">
+                        <button type="button" class="btn btn-danger remove-entry" style="display: none;">Remove Entry</button>
+                    </div>
+                </div>
             </div>
         </div>
 
         <div class="row mb-3">
             <div class="col">
-                <input type="number" type="number" name="nominal" step="0.01" class="form-control" placeholder="Nominal">
-            </div>
-            <div class="col">
-                <input type="number" type="number" name="price_quotation" step="0.01" class="form-control" placeholder="Price Quotation">
+                <button type="button" class="btn btn-secondary" id="addEntry">Add Another Entry</button>
+                <button type="submit" class="btn btn-primary">Submit All Entries</button>
             </div>
         </div>
-
-        {{-- <div>
-            <label for="nominal">Nominal:</label>
-            <input  value="{{ old('nominal') }}" required>
-            @error('nominal')
-                <div class="text-danger">{{ $message }}</div>
-            @enderror
-        </div> --}}
-
-        <!-- Operational Project Fields -->
-
-        <div class="row mb-3">
-            <div class="col">
-                <textarea class="form-control" name="keterangan" placeholder="Keterangan"></textarea>
-            </div>
-        </div>
-
-        <div class="row mb-3">
-            <div class="col">
-                <select name="users[]" multiple class="form-control" required>
-                    <option value="" disabled selected>Nama User</option>
-                    @foreach($users as $user)
-                        <option value="{{ $user->id }}">{{ $user->name }} - {{ $user->position }}</option>
-                    @endforeach
-                </select>
-            </div>
-            </div>
-
-        <button type="submit">Submit</button>
     </form>
-</div>
-@endsection
 
-@section('scripts')
+@push('scripts')
+    @include('contractor.report_project.script')
+@endpush
+
+@push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const container = document.getElementById('deal-projects-container');
-    const addButton = document.getElementById('add-more');
-    addButton.addEventListener('click', function() {
-        const forms = container.getElementsByClassName('deal-project-form');
-        const firstForm = forms[0];
-        const newForm = firstForm.cloneNode(true);
-        newForm.querySelectorAll('input').forEach(input => {
+    let entryCount = 0;
+    const entriesContainer = document.getElementById('project-entries');
+    const addEntryButton = document.getElementById('addEntry');
+    addEntryButton.addEventListener('click', function() {
+        entryCount++;
+        const newEntry = document.querySelector('.project-entry').cloneNode(true);
+        newEntry.querySelectorAll('input, select').forEach(input => {
+            input.name = input.name.replace('[0]', `[${entryCount}]`);
             input.value = '';
         });
-        newForm.querySelectorAll('select').forEach(select => {
-            select.selectedIndex = 0;
+        const removeButton = newEntry.querySelector('.remove-entry');
+        removeButton.style.display = 'block';
+        removeButton.addEventListener('click', function() {
+            newEntry.remove();
         });
-        newForm.querySelector('.remove-form').style.display = 'block';
-        container.appendChild(newForm);
-        if (forms.length === 1) {
-            firstForm.querySelector('.remove-form').style.display = 'block';
-        }
-    });
-    container.addEventListener('click', function(e) {
-        if (e.target.classList.contains('remove-form')) {
-            const forms = container.getElementsByClassName('deal-project-form');
-            if (forms.length > 1) {
-                e.target.closest('.deal-project-form').remove();
-                if (forms.length === 2) {
-                    forms[0].querySelector('.remove-form').style.display = 'none';
-                }
-            }
-        }
+        entriesContainer.appendChild(newEntry);
     });
 });
 </script>
+@endpush
 @endsection

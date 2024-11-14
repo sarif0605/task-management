@@ -1,75 +1,69 @@
 <script type="text/javascript">
     var userPosition = "{{ Auth::user()->position }}";
     $(document).ready(function () {
-        $("#table-deal").DataTable({
-            processing: true,
-            serverSide: false,
-            ajax: {
-                url: "{{ route('report_projects') }}",
-                type: "GET",
-                dataType: "json",
-                headers: {
-                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+    $("#table-report").DataTable({
+        processing: true,
+        serverSide: false,
+        ajax: {
+            url: "{{ route('report_projects') }}",
+            type: "GET",
+            dataType: "json",
+            headers: {
+                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+            },
+        },
+        columns: [
+            {
+                data: null,
+                render: (data, type, row, meta) => {
+                    return meta.row + 1;
                 },
             },
-            columns: [
-                {
-                    data: null,
-                    render: (data, type, row, meta) => {
-                        return meta.row + 1;
-                    },
-                },
-                {
-                    data: "prospect.nama_produk",
-                    render: function (data, type, row) {
-                        return data ? data : "N/A";
+            {
+                data: "deal_project.prospect.nama_produk",
+                render: function (data) {
+                    return data ? data : "N/A";
+                }
+            },
+            { data: "status" },
+            { data: "start_date" },
+            { data: "end_date" },
+            { data: "bobot" },
+            { data: "progress" },
+            { data: "durasi" },
+            { data: "harian" },
+            {
+                data: null,
+                orderable: false,
+                searchable: false,
+                render: function (data) {
+                    if(userPosition === 'sales' || userPosition === 'admin'){
+                        return `
+                            <a href="/report_projects/show/${data.id}" class="btn btn-secondary"><i class="fa-solid fa-circle-info"></i></a>
+                            <a href="/report_projects/edit/${data.id}" class="btn btn-warning"><i class="fa-solid fa-pen-to-square"></i></a>
+                            <button class="btn btn-danger delete-btn" data-id="${data.id}"><i class="fa-solid fa-trash-arrow-up"></i></button>
+                        `;
+                    } else {
+                        return `
+                            <a href="/report_projects/show/${data.id}" class="btn btn-secondary"><i class="fa-solid fa-circle-info"></i></a>`;
                     }
                 },
-                { data: "date" },
-                { data: "price_quotation" },
-                { data: "nominal" },
-                { data: "keterangan",
-                render: function (data, type, row) {
-                    return data.length > 15 ? data.substring(0, 15) + "..." : data;
-                }
-                 },
-                 { data: "lokasi",
-                render: function (data, type, row) {
-                    return data.length > 15 ? data.substring(0, 15) + "..." : data;
-                }
-                 },
-                {
-                    data: null,
-                    orderable: false,
-                    searchable: false,
-                    render: function (data) {
-                        if(userPosition === 'sales' || userPosition === 'admin'){
-                            return `
-                                <a href="/deal_projects/show/${data.id}" class="btn btn-secondary"><i class="fa-solid fa-circle-info"></i></a>
-                                <a href="/deal_projects/edit/${data.id}" class="btn btn-warning"><i class="fa-solid fa-pen-to-square"></i></a>
-                                <button class="btn btn-danger delete-btn" data-id="${data.id}"><i class="fa-solid fa-trash-arrow-up"></i></button>
-                            `;
-                        } else {
-                            return `
-                                <a href="/deal_projects/show/${data.id}" class="btn btn-secondary"><i class="fa-solid fa-circle-info"></i></a>`;
-                        }
-
-                    },
-                },
-            ],
-        });
-        $("#table-prospect").on("click", ".delete-btn", function () {
-            const surveyId = $(this).data("id");
-            deleteSurvey(surveyId);
-        });
+            },
+        ],
     });
+
+    $("#table-report").on("click", ".delete-btn", function () {
+        const surveyId = $(this).data("id");
+        deleteSurvey(surveyId);
+    });
+});
 
     const createData = () => {
         $("#loading").show();
         $.ajax({
-            url: $("#survey-form").attr("action"),
+            url: $("#report-form").attr("action"),
             type: "POST",
-            data: $("#survey-form").serialize(),
+            data: $("#report-form").serialize(),
             headers: {
                 "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
             },
@@ -82,20 +76,27 @@
                     showConfirmButton: false,
                     timer: 1500,
                 }).then(() => {
-                    $("#table-survey").DataTable().ajax.reload();
-                    $("#survey-form")[0].reset();
-                    window.location.href = "/surveys";
+                    $("#table-report").DataTable().ajax.reload();
+                    $("#report-form")[0].reset();
+                    window.location.href = "/report_projects";
                 });
             },
             error: function (xhr) {
                 $("#loading").hide();
-                const errors =
-                    xhr.responseJSON?.errors ||
-                    "There was a problem creating the prospect.";
+                const errors = xhr.responseJSON?.errors;
+                console.error("Submission errors:", errors);
+                let errorMessage = '';
+                if (typeof errors === 'object') {
+                    for (let field in errors) {
+                        errorMessage += `${field}: ${errors[field].join(', ')}\n`;
+                    }
+                } else {
+                    errorMessage = 'Terjadi kesalahan saat menyimpan data';
+                }
                 Swal.fire({
                     icon: "error",
                     title: "Error",
-                    text: errors,
+                    text: errorMessage
                 });
             },
         });
@@ -104,9 +105,9 @@
     const updateProspectData = () => {
         $("#loading").show();
         $.ajax({
-            url: $("#survey-form-edit").attr("action"),
+            url: $("#report-form-edit").attr("action"),
             type: "POST",
-            data: $("#survey-form-edit").serialize(),
+            data: $("#report-form-edit").serialize(),
             headers: {
                 "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
             },
@@ -119,63 +120,63 @@
                     showConfirmButton: false,
                     timer: 1500,
                 }).then(() => {
-                    $("#table-survey").DataTable().ajax.reload();
-                    $("#survey-form-edit")[0].reset();
-                    window.location.href = "/surveys";
+                    $("#table-report").DataTable().ajax.reload();
+                    $("#report-form-edit")[0].reset();
+                    window.location.href = "/report_projects";
                 });
             },
             error: function (xhr) {
                 $("#loading").hide();
-                const errors =
-                    xhr.responseJSON?.errors ||
-                    "Gagal memperbarui data. Silakan coba lagi.";
+                const errors = xhr.responseJSON?.errors;
+                console.error("Submission errors:", errors);
+                let errorMessage = '';
+                if (typeof errors === 'object') {
+                    for (let field in errors) {
+                        errorMessage += `${field}: ${errors[field].join(', ')}\n`;
+                    }
+                } else {
+                    errorMessage = 'Terjadi kesalahan saat menyimpan data';
+                }
                 Swal.fire({
                     icon: "error",
                     title: "Error",
-                    text: errors,
+                    text: errorMessage
                 });
             },
         });
     }
 
     function deleteSurvey(surveyId) {
-        Swal.fire({
-            title: "Apakah Anda Yakin?",
-            text: `Anda yakin menghapus data dengan ID ${surveyId}?`,
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#d33",
-            cancelButtonColor: "#3085d6",
-            confirmButtonText: "Yes, delete it!",
-            cancelButtonText: "Cancel",
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: `/surveys/destroy/${surveyId}`,
-                    type: "DELETE",
-                    headers: {
-                        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
-                    },
-                    success: function () {
-                        Swal.fire({
-                            icon: "success",
-                            title: "Deleted!",
-                            text: `Survey dengan ID ${surveyId} telah dihapus.`,
-                            timer: 2000,
-                        });
-                        $("#table-survey").DataTable().ajax.reload();
-                    },
-                    error: function () {
-                        Swal.fire({
-                            icon: "error",
-                            title: "Oops...",
-                            text: "Gagal menghapus data. Silakan coba lagi.",
-                        });
-                    },
-                });
-            }
-        });
-    }
+    Swal.fire({
+        title: "Are you sure?",
+        text: `You want to delete the entry with ID ${surveyId}?`,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, delete it!",
+        cancelButtonText: "Cancel",
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: `/report_projects/destroy/${surveyId}`,
+                type: "DELETE",
+                headers: {
+                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+                },
+                success: function () {
+                    Swal.fire({
+                        icon: "success",
+                        title: "Deleted",
+                        text: "The entry has been deleted.",
+                    });
+                    $("#table-report").DataTable().ajax.reload();
+                },
+            });
+        }
+    });
+}
+
 
     $(document).ready(function () {
         function handleFormSubmit(formSelector, submitFunction) {
@@ -184,8 +185,8 @@
                 submitFunction();
             });
         }
-        handleFormSubmit("#survey-form", createData);
-        handleFormSubmit("#survey-form-edit", updateProspectData);
+        handleFormSubmit("#report-form", createData);
+        handleFormSubmit("#report-form-edit", updateProspectData);
     });
 
     </script>

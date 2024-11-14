@@ -2,16 +2,17 @@
 
 namespace App\Http\Controllers\Constructor;
 
-use App\Http\Requests\DealProject\DealProjectCreateRequest;
-use App\Http\Requests\DealProject\DealProjectUpdateRequest;
 use App\Models\DealProject;
 use App\Models\Prospect;
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\DealProject\DealProjectCreateRequest;
+use App\Http\Requests\DealProject\DealProjectUpdateRequest;
 use App\Models\DealProjectUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class DealProjectController extends Controller
 {
@@ -46,9 +47,13 @@ class DealProjectController extends Controller
      */
     public function create()
     {
-        $prospect = Prospect::all();
-        $users = User::where('position', 'pengawas')->get();
-        return view('contractor.done_deal.create', compact('prospect', 'users'));
+        $users = User::with(['profile', 'position'])
+                    ->whereDoesntHave('position', function($query) {
+                        $query->where('name', 'Admin');
+                    })
+                    ->get();
+
+        return view('contractor.prospect.index', compact('users'));
     }
 
     /**
@@ -56,27 +61,53 @@ class DealProjectController extends Controller
      */
     public function store(DealProjectCreateRequest $request)
     {
-        $validatedData = $request->validated();
-        DB::transaction(function () use ($validatedData) {
-            $dealProject = DealProject::create($validatedData);
-            foreach ($validatedData['users'] as $userId) {
-                DealProjectUsers::create([
-                    'deal_project_id' => $dealProject->id,
-                    'user_id' => $userId
+        // Log incoming request data for debugging
+        Log::info('DealProject store request data:', $request->all());
+
+        try {
+            $result = DB::transaction(function () use ($request) {
+                $data = $request->validated();
+                $dealProject = DealProject::create([
+                    'prospect_id' => $data['prospect_id'],
+                    'date' => $data['date'],
+                    'harga_deal' => $data['harga_deal'],
+                    'keterangan' => $data['keterangan'] ?? null,
                 ]);
-            }
-            if (isset($validatedData['prospect_id'])) {
-                $prospect = Prospect::find($validatedData['prospect_id']);
-                if ($prospect) {
-                    $prospect->status = 'deal';
-                    $validatedData['lokasi'] = $prospect->lokasi;
-                    $prospect->save();
-                } else {
-                    return response()->json(['error' => 'Prospect not found.'], 404);
+                Log::info('DealProject created:', ['id' => $dealProject->id]);
+                foreach ($data['users'] as $userId) {
+                    DealProjectUsers::create([
+                        'deal_project_id' => $dealProject->id,
+                        'user_id' => $userId,
+                    ]);
                 }
-            }
-        });
-        return response()->json(['message' => 'Data berhasil disimpan'], 201);
+                Log::info('DealProject users assigned:', ['users' => $data['users']]);
+                $prospect = Prospect::findOrFail($data['prospect_id']);
+                $prospect->update(['status' => 'survey']);
+                Log::info('Prospect status updated:', [
+                    'prospect_id' => $prospect->id,
+                    'new_status' => 'survey'
+                ]);
+                return $dealProject;
+            });
+            return response()->json([
+                'success' => true,
+                'message' => 'Deal Project berhasil dibuat',
+                'data' => $result
+            ], 201);
+
+        } catch (\Exception $e) {
+            // Log the error
+            Log::error('Error creating deal project:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat membuat Deal Project',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -100,10 +131,10 @@ class DealProjectController extends Controller
         $dealProject = DealProject::find($id);
         $prospect = Prospect::all();
         if (!$dealProject) {
-            return redirect()->route('advertising.sales.deal_project.index')
+            return redirect()->route('done_deals')
             ->with('error', 'Deal Project dengan ID ' . $id . ' tidak ditemukan.');
         }
-        return view('deal_projects.edit', compact('dealProject', 'prospect'));
+        return view('contractor.done_deal.edit', compact('dealProject', 'prospect'));
     }
 
     /**
@@ -113,12 +144,12 @@ class DealProjectController extends Controller
     {
         $dealProject = DealProject::find($id);
         if (!$dealProject) {
-            return redirect()->route('advertising.sales.deal_project.index')
+            return redirect()->route('done_deals')
             ->with('error', 'Deal Project dengan ID ' . $id . ' tidak ditemukan.');
         }
         $data = $request->validated();
         $dealProject->update($data);
-        return redirect()->route('advertising.sales.deal_project.index')->with('success', 'Deal Project updated successfully.');
+        return redirect()->route('done_deals')->with('success', 'Deal Project updated successfully.');
     }
 
     /**
@@ -128,10 +159,10 @@ class DealProjectController extends Controller
     {
         $dealProject = DealProject::find($id);
         if (!$dealProject) {
-            return redirect()->route('advertising.sales.deal_project.index')
+            return redirect()->route('done_deals')
             ->with('error', 'Survey dengan ID ' . $id . ' tidak ditemukan.');
         }
         $dealProject->delete();
-        return redirect()->route('advertising.sales.deal_project.index')->with('success', 'Deal Project deleted successfully.');
+        return redirect()->route('done_deals')->with('success', 'Deal Project deleted successfully.');
     }
 }

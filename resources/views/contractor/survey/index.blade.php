@@ -1,17 +1,15 @@
 @extends('layouts.contractor')
-
 @section('title', 'Home Survey')
-
 @section('content')
     <div class="d-flex align-items-center justify-content-between mb-2">
-        {{-- @if (Auth::user()->position == 'sales' || Auth::user()->position == 'admin')
+        @if (Auth::user()->position == 'sales' || Auth::user()->position == 'admin')
             <a href="{{ route('surveys.create') }}" class="btn btn-primary"><i class="fa-solid fa-square-plus"></i> Add</a>
-        @endif --}}
+        @endif
     </div>
     <hr class="mb-1" />
     <table
-        id="table-report"
-        class="table table-hover mt-3 table-striped table-hover text-center"
+        id="table-survey"
+        class="table table-hover mt-3 table-striped table-hover"
       >
         <thead class="table-primary">
           <tr>
@@ -26,6 +24,6 @@
       </table>
 
     @push('scripts')
-        @include('contractor.report_project.script')
+        @include('contractor.survey.script')
     @endpush
 @endsection

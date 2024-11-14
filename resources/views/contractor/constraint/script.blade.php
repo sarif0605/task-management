@@ -1,5 +1,4 @@
-
-                <script type="text/javascript">
+<script type="text/javascript">
                     $(document).ready(function () {
                         $("#table-kendala").DataTable({
                             processing: true,
@@ -20,7 +19,7 @@
                                     },
                                 },
                                 {
-                                    data: "deal_project.prospect.nama_produk",
+                                    data: "report_project.deal_project.prospect.nama_produk",
                                     render: function (data) {
                                         return data ? data : "N/A";
                                     }
@@ -86,14 +85,21 @@
                             },
                             error: function (xhr) {
                                 $("#loading").hide();
-                                const errors =
-                                    xhr.responseJSON?.errors ||
-                                    "There was a problem creating the prospect.";
-                                Swal.fire({
-                                    icon: "error",
-                                    title: "Error",
-                                    text: errors,
-                                });
+                const errors = xhr.responseJSON?.errors;
+                console.error("Submission errors:", errors);
+                let errorMessage = '';
+                if (typeof errors === 'object') {
+                    for (let field in errors) {
+                        errorMessage += `${field}: ${errors[field].join(', ')}\n`;
+                    }
+                } else {
+                    errorMessage = 'Terjadi kesalahan saat menyimpan data';
+                }
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: errorMessage
+                });
                             },
                         });
                     };
@@ -123,14 +129,21 @@
                             },
                             error: function (xhr) {
                                 $("#loading").hide();
-                                const errors =
-                                    xhr.responseJSON?.errors ||
-                                    "Gagal memperbarui data. Silakan coba lagi.";
-                                Swal.fire({
-                                    icon: "error",
-                                    title: "Error",
-                                    text: errors,
-                                });
+                const errors = xhr.responseJSON?.errors;
+                console.error("Submission errors:", errors);
+                let errorMessage = '';
+                if (typeof errors === 'object') {
+                    for (let field in errors) {
+                        errorMessage += `${field}: ${errors[field].join(', ')}\n`;
+                    }
+                } else {
+                    errorMessage = 'Terjadi kesalahan saat menyimpan data';
+                }
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: errorMessage
+                });
                             },
                         });
                     }

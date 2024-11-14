@@ -17,31 +17,24 @@ class AuthController extends Controller
         return view('auth.verifikasi_otp');
     }
 
-    protected function generateOtpCode(Request $request)
+    public function generateOtpCode(Request $request)
     {
         $request->validate([
             'email' => 'required|email'
         ]);
-
         $userData = User::where('email', $request->email)
             ->with('profile')
             ->first();
-
         if (!$userData) {
             return response()->json([
                 "message" => "Email tidak ditemukan"
             ], 404);
         }
-
         $userData->generateOtpCode();
-
-        // Set valid_until to 1 minute from now
         $otpCode = OtpCodes::where('user_id', $userData->id)->first();
         $otpCode->valid_until = Carbon::now()->addMinute();
         $otpCode->save();
-
         Mail::to($userData->email)->queue(new MailSendOtp($userData));
-
         return view('auth.verifikasi_otp');
     }
 

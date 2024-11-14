@@ -14,7 +14,7 @@ class DealProject extends Model
     protected $keyType = "string";
     public $incrementing = false;
     public $timestamps = true;
-    protected $fillable = [ 'prospect_id', 'date', 'price_quotation', 'nominal', 'lokasi', 'keterangan'];
+    protected $fillable = ['prospect_id', 'date', 'harga_deal', 'keterangan'];
 
     public function prospect()
     {
@@ -26,17 +26,7 @@ class DealProject extends Model
         return $this->hasMany(DealProjectUsers::class, 'deal_project_id', 'id');
     }
 
-    public function constraints()
-    {
-        return $this->hasMany(Constraints::class, 'deal_project_id', 'id');
-    }
-
-    public function opnams()
-    {
-        return $this->hasMany(Opnams::class, 'deal_project_id', 'id');
-    }
-
-    public function material(){
-        return $this->hasMany(Materials::class, 'deal_project_id', 'id');
+    public function report_project(){
+        return $this->hasMany(ReportProject::class, 'report_project_id', 'id');
     }
 }

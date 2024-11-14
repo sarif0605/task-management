@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Auth\UserUpdateRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
@@ -14,16 +13,23 @@ class UserController extends Controller
         $this->middleware(['isVerificationAccount', 'isStatusAccount'])->only('store', 'create', 'edit', 'update', 'destroy', 'index', 'show');
     }
 
-     public function index(Request $request)
-     {
-         if ($request->ajax()) {
-             $user = Auth::user();
-             $query = User::where('position', '!=', 'admin')->orderBy('created_at', 'DESC')->get();
-             return response()->json(['data' => $query]);
-         }
-
-         return view('contractor.done_deal.index');
-     }
+    public function index(Request $request)
+    {
+        if ($request->ajax()) {
+            $query = User::with('profile', 'position')
+                ->whereHas('position', function($query) {
+                    $query->where('name', '!=', 'admin');
+                })
+                ->orderBy('created_at', 'DESC')
+                ->get()
+                ->map(function($user) {
+                    $user->positions = $user->position->pluck('name')->join(', ');
+                    return $user;
+                });
+            return response()->json(['data' => $query]);
+        }
+        return view('contractor.user.index');
+    }
 
     /**
      * Display the specified resource.
@@ -32,10 +38,9 @@ class UserController extends Controller
     {
         $user = User::find($id);
         if (!$user) {
-            return redirect()->route('/users')
-            ->with('error', 'User dengan ID ' . $id . ' tidak ditemukan.');
+            return redirect()->route('users')->with('error', 'User dengan ID ' . $id . ' tidak ditemukan.');
         }
-        return view('user.show');
+        return view('contractor.user.show', compact('user'));
     }
 
     /**
@@ -45,10 +50,10 @@ class UserController extends Controller
     {
         $user = User::find($id);
         if (!$user) {
-            return redirect()->route('user.index')
+            return redirect()->route('users')
             ->with('error', 'User dengan ID ' . $id . ' tidak ditemukan.');
         }
-        return view('user.edit', compact('dealProject', 'prospect'));
+        return view('contractor.user.edit', compact('user'));
     }
 
     /**
@@ -58,12 +63,12 @@ class UserController extends Controller
     {
         $user = User::find($id);
         if (!$user) {
-            return redirect()->route('user.index')
+            return redirect()->route('users')
             ->with('error', 'User dengan ID ' . $id . ' tidak ditemukan.');
         }
         $data = $request->validated();
         $user->update($data);
-        return redirect()->route('user.index')->with('success', 'Deal Project updated successfully.');
+        return redirect()->route('users')->with('success', 'Deal Project updated successfully.');
     }
 
     /**
@@ -73,10 +78,10 @@ class UserController extends Controller
     {
         $user = User::find($id);
         if (!$user) {
-            return redirect()->route('user.index')
+            return redirect()->route('users')
             ->with('error', 'User dengan ID ' . $id . ' tidak ditemukan.');
         }
         $user->delete();
-        return redirect()->route('advertising.sales.deal_project.index')->with('success', 'Deal Project deleted successfully.');
+        return redirect()->route('users')->with('success', 'Deal Project deleted successfully.');
     }
 }

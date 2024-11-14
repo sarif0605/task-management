@@ -3,25 +3,20 @@
 namespace App\Http\Controllers\Constructor;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\ReportProject\ReportProjectCreateRequest;
 use App\Http\Requests\ReportProject\ReportProjectUpdateRequest;
 use App\Models\DealProject;
 use App\Models\ReportProject;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ReportProjectController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware(['isVerificationAccount', 'isStatusAccount'])->only('store', 'create', 'edit', 'update', 'destroy');
-    }
-
     public function index(Request $request)
     {
         if ($request->ajax()) {
             $user = Auth::user();
-            $query = ReportProject::with(['deal_project.prospect', 'deal_project.deal_project_users']);
+            $query = ReportProject::with(['deal_project.prospect']);
             if ($user->position === 'pengawas') {
                 $query->whereHas('deal_project.deal_project_users', function($q) use ($user) {
                     $q->where('user_id', $user->id);
@@ -31,28 +26,52 @@ class ReportProjectController extends Controller
 
             return response()->json(['data' => $materials]);
         }
-
-        return view('contractor.material.index');
+        return view('contractor.report_project.index');
     }
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
-    {
-        $operationalProject = DealProject::all();
-        return view('contractor.material.create', compact('operationalProject'));
+
+    public function create($deal_project_id) {
+        return view('contractor.report_project.create', compact('deal_project_id'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(ReportProjectCreateRequest $request)
+    public function store(Request $request)
     {
-        $data = $request->validated();
-        $material = new ReportProject($data);
-        $material->save();
-        return redirect()->route('contractor.material.index')->with('success', 'Material created successfully.');
+        try {
+            DB::beginTransaction();
+            $validatedData = $request->validate([
+                'deal_project_id' => 'required|exists:deal_projects,id',
+                'entries' => 'required|array',
+                'entries.*.status' => 'required|in:belum,mulai,selesai',
+                'entries.*.start_date' => 'required|date',
+                'entries.*.end_date' => 'required|date|after_or_equal:entries.*.start_date',
+                'entries.*.bobot' => 'required|numeric|min:0',
+                'entries.*.progress' => 'required|numeric|min:0|max:100',
+                'entries.*.durasi' => 'required|numeric|min:0',
+                'entries.*.harian' => 'required|numeric|min:0',
+            ]);
+            foreach ($validatedData['entries'] as $entry) {
+                ReportProject::create([
+                    'deal_project_id' => $validatedData['deal_project_id'],
+                    'status' => $entry['status'],
+                    'start_date' => $entry['start_date'],
+                    'end_date' => $entry['end_date'],
+                    'bobot' => $entry['bobot'],
+                    'progress' => $entry['progress'],
+                    'durasi' => $entry['durasi'],
+                    'harian' => $entry['harian'],
+                ]);
+            }
+            DB::commit();
+            return redirect()->route('report_projects')
+                           ->with('success', 'Project entries created successfully');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Error creating project entries. Please try again.')
+                        ->withInput();
+        }
     }
 
     /**
@@ -60,12 +79,12 @@ class ReportProjectController extends Controller
      */
     public function show(string $id)
     {
-        $material = ReportProject::with('operational_project')->find($id);
-        if (!$material) {
-            return redirect()->route('contractor.material.index')
+        $report_project = ReportProject::with('deal_project.prospect')->find($id);
+        if (!$report_project) {
+            return redirect()->route('report_projects')
             ->with('error', 'Material dengan ID ' . $id . ' tidak ditemukan.');
         }
-        return view('contractor.material.show', compact('prospect'));
+        return view('contractor.report_project.show', compact('report_project'));
     }
 
     /**
@@ -76,7 +95,7 @@ class ReportProjectController extends Controller
         $material = ReportProject::find($id);
         $operationalProject = DealProject::all();
         if (!$material) {
-            return redirect()->route('contractor.material.index')
+            return redirect()->route('report_projects.edit')
             ->with('error', 'Material dengan ID ' . $id . ' tidak ditemukan.');
         }
         return view('contractor.material.edit', compact('material', 'operationalProject'));
@@ -89,7 +108,7 @@ class ReportProjectController extends Controller
     {
         $material = ReportProject::find($id);
         if (!$material) {
-            return redirect()->route('contractor.material.index')
+            return redirect()->route('report_projects.edit')
             ->with('error', 'Material dengan ID ' . $id . ' tidak ditemukan.');
         }
         $data = $request->validated();
@@ -104,10 +123,10 @@ class ReportProjectController extends Controller
     {
         $material = ReportProject::find($id);
         if (!$material) {
-            return redirect()->route('contractor.material.index')
+            return redirect()->route('report_projects')
             ->with('error', 'Material dengan ID ' . $id . ' tidak ditemukan.');
         }
         $material->delete();
-        return redirect()->route('contractor.material.index')->with('success', 'Material deleted successfully.');
+        return redirect()->route('report_projects')->with('success', 'Material deleted successfully.');
     }
 }

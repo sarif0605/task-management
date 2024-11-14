@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('pemilik', 100)->nullable();
             $table->string('lokasi', 200)->nullable();
             $table->text('keterangan');
-            $table->enum('status', ['prospek', 'survey', 'deal'])->default('prospek')->nullable();
+            $table->enum('status', ['prospek', 'survey', 'penawaran', 'deal'])->default('prospek')->nullable();
             $table->timestamps();
         });
     }

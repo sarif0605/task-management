@@ -9,6 +9,7 @@ use App\Exports\ProspectExport;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ProspectController extends Controller
@@ -28,7 +29,13 @@ class ProspectController extends Controller
             return response()->json(['data' => $prospects]);
         }
 
-        return view('contractor.prospect.index');
+        $users = User::with(['profile', 'position'])
+        ->whereDoesntHave('position', function($query) {
+            $query->where('name', 'Admin');
+        })
+        ->get();
+
+        return view('contractor.prospect.index', compact('users'));
     }
 
     public function export()
@@ -81,7 +88,7 @@ class ProspectController extends Controller
     {
         $prospect = Prospect::find($id);
         if (!$prospect) {
-            return redirect()->route('prospects')
+            return redirect()->route('prospects.edit')
             ->with('error', 'Prospect dengan ID ' . $id . ' tidak ditemukan.');
         }
         return view('contractor.prospect.edit', compact('prospect'));
@@ -94,7 +101,7 @@ class ProspectController extends Controller
     {
         $prospect = Prospect::find($id);
         if (!$prospect) {
-            return redirect()->route('prospects')
+            return redirect()->route('prospects.edit')
             ->with('error', 'Prospect dengan ID ' . $id . ' tidak ditemukan.');
         }
         $data = $request->validated();

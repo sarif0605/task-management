@@ -16,9 +16,7 @@ return new class extends Migration
             $table->uuid('prospect_id');
             $table->foreign('prospect_id')->references('id')->on('prospects')->onDelete('cascade')->onUpdate('cascade');
             $table->date('date');
-            $table->decimal('price_quotation', 15, 2);
-            $table->decimal('nominal', 15, 2);
-            $table->string('lokasi', 200)->nullable();
+            $table->decimal('harga_deal', 15, 2);
             $table->text('keterangan');
             $table->timestamps();
         });

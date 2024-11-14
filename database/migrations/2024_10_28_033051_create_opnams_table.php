@@ -17,6 +17,11 @@ return new class extends Migration
             $table->foreign('report_project_id')->references('id')->on('report_projects')->onDelete('cascade')->onUpdate('cascade');
             $table->date('date');
             $table->text('pekerjaan');
+            $table->string('opnam');
+            $table->float('kasbon_1');
+            $table->float('kasbon_2');
+            $table->float('kasbon_3');
+            $table->text('keterangan');
             $table->timestamps();
         });
     }

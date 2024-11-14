@@ -4,12 +4,12 @@ namespace App\Http\Controllers\Constructor;
 
 use App\Http\Requests\Opnam\OpnamCreateRequest;
 use App\Http\Requests\Opnam\OpnamUpdateRequest;
-use App\Models\OperationalProjects;
 use App\Models\Opnams;
 use App\Http\Controllers\Controller;
 use App\Models\DealProject;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class OpnamController extends Controller
 {
@@ -23,9 +23,12 @@ class OpnamController extends Controller
     {
         if ($request->ajax()) {
             $user = Auth::user();
-            $query = Opnams::with(['deal_project.prospect', 'deal_project.deal_project_users']);
+            $query = Opnams::with([
+                'report_project.deal_project.prospect',
+                'report_project.deal_project.deal_project_users'
+            ]);
             if ($user->position === 'pengawas') {
-                $query->whereHas('deal_project.deal_project_users', function($q) use ($user) {
+                $query->whereHas('report_project.deal_project.deal_project_users', function($q) use ($user) {
                     $q->where('user_id', $user->id);
                 });
             }
@@ -38,21 +41,37 @@ class OpnamController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create($report_project_id)
     {
-        $operationalProject = DealProject::all();
-        return view('contractor.opnam.create', compact('operationalProject'));
+        return view('contractor.opnam.create', compact('report_project_id'));
     }
 
     /**
      * Store a newly created resource in storage.
      */
+
+
     public function store(OpnamCreateRequest $request)
     {
         $data = $request->validated();
-        $opnam = new Opnams($data);
-        $opnam->save();
-        return redirect()->route('contractor.opnam.index')->with('success', 'Material created successfully.');
+    try {
+        DB::beginTransaction();
+        foreach ($data['entries'] as $entry) {
+            Opnams::create([
+                'report_project_id' => $data['report_project_id'],
+                // 'lokasi' => $entry['lokasi'],
+                'pekerjaan' => $entry['pekerjaan'],
+                'date' => $entry['date']
+            ]);
+        }
+        DB::commit();
+            return redirect()->route('opnams')->with('success', 'Project entries created successfully');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Error creating project entries. Please try again.')
+                        ->withInput();
+        }
+        return redirect()->route('opnams')->with('success', 'Material created successfully.');
     }
 
     /**
@@ -62,7 +81,7 @@ class OpnamController extends Controller
     {
         $opnam = Opnams::with('operational_project')->find($id);
         if (!$opnam) {
-            return redirect()->route('contractor.opnam.index')
+            return redirect()->route('opnams')
             ->with('error', 'Opnam dengan ID ' . $id . ' tidak ditemukan.');
         }
         return view('contractor.opnam.show', compact('prospect'));
@@ -76,7 +95,7 @@ class OpnamController extends Controller
         $opnam = Opnams::find($id);
         $operationalProject = DealProject::all();
         if (!$opnam) {
-            return redirect()->route('contractor')
+            return redirect()->route('opnams')
             ->with('error', 'Opnam dengan ID ' . $id . ' tidak ditemukan.');
         }
         return view('contractor.opnam.edit', compact('material', 'operationalProject'));
@@ -89,12 +108,12 @@ class OpnamController extends Controller
     {
         $opnam = Opnams::find($id);
         if (!$opnam) {
-            return redirect()->route('contractor.opnam.index')
+            return redirect()->route('opnams.edit')
             ->with('error', 'Opnam dengan ID ' . $id . ' tidak ditemukan.');
         }
         $data = $request->validated();
         $opnam->update($data);
-        return redirect()->route('contractor.opnam.index')->with('success', 'Opnam updated successfully.');
+        return redirect()->route('opnams')->with('success', 'Opnam updated successfully.');
     }
 
     /**
@@ -104,10 +123,10 @@ class OpnamController extends Controller
     {
         $opnam = Opnams::find($id);
         if (!$opnam) {
-            return redirect()->route('contractor.opnam.index')
+            return redirect()->route('opnams')
             ->with('error', 'Opnam dengan ID ' . $id . ' tidak ditemukan.');
         }
         $opnam->delete();
-        return redirect()->route('contractor.opnam.index')->with('success', 'Material deleted successfully.');
+        return redirect()->route('opnams')->with('success', 'Material deleted successfully.');
     }
 }

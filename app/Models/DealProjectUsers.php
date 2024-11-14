@@ -15,10 +15,7 @@ class DealProjectUsers extends Model
     protected $keyType = "string";
     public $incrementing = false;
     public $timestamps = true;
-    protected $fillable = [
-        'deal_project_id',
-        'user_id',
-    ];
+    protected $fillable = ['deal_project_id', 'user_id'];
 
     public function deal_project(){
         return $this->belongsTo(DealProject::class, 'deal_project_id', 'id');
@@ -27,6 +24,5 @@ class DealProjectUsers extends Model
     public function user(){
         return $this->belongsTo(User::class, 'user_id', 'id');
     }
-
 
 }

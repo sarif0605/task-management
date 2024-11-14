@@ -15,7 +15,8 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->uuid('survey_id');
             $table->foreign('survey_id')->references('id')->on('surveys')->onDelete('cascade')->onUpdate('cascade');
-            $table->string('image_link');
+            $table->string('image_url');
+            $table->string('image_public_id');
             $table->timestamps();
         });
     }

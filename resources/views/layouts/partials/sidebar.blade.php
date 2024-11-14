@@ -18,6 +18,15 @@
       <span>Dashboard</span></a>
   </li>
 
+  @if (Auth::check() && Auth::user()->hasRole('admin'))
+  <li class="nav-item">
+    <a class="nav-link" href="{{ route('users') }}">
+      <i class="fas fa-fw fa-tachometer-alt"></i>
+      <span>User</span>
+    </a>
+  </li>
+@endif
+
   <li class="nav-item">
     <a class="nav-link" href="{{ route('prospects') }}">
       <i class="fas fa-fw fa-tachometer-alt"></i>
@@ -28,6 +37,12 @@
     <a class="nav-link" href="{{ route('surveys') }}">
       <i class="fas fa-fw fa-tachometer-alt"></i>
       <span>Survey</span></a>
+  </li>
+
+  <li class="nav-item">
+    <a class="nav-link" href="{{ route('penawaran_projects') }}">
+      <i class="fas fa-fw fa-tachometer-alt"></i>
+      <span>Penawaran Project</span></a>
   </li>
 
   <li class="nav-item">

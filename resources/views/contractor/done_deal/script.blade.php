@@ -1,5 +1,5 @@
 <script type="text/javascript">
-    var userPosition = "{{ Auth::user()->position }}";
+var userPosition = "{{ Auth::user()->position->pluck('name')->join(', ') }}";
     $(document).ready(function () {
         $("#table-deal").DataTable({
             processing: true,
@@ -26,14 +26,8 @@
                     }
                 },
                 { data: "date" },
-                { data: "price_quotation" },
-                { data: "nominal" },
+                { data: "harga_deal" },
                 { data: "keterangan",
-                render: function (data, type, row) {
-                    return data.length > 15 ? data.substring(0, 15) + "..." : data;
-                }
-                 },
-                 { data: "lokasi",
                 render: function (data, type, row) {
                     return data.length > 15 ? data.substring(0, 15) + "..." : data;
                 }
@@ -43,7 +37,7 @@
                     orderable: false,
                     searchable: false,
                     render: function (data) {
-                        if(userPosition === 'sales'){
+                        if(userPosition === 'Sales' || userPosition === 'Admin'){
                             return `
                                 <a href="/deal_projects/show/${data.id}" class="btn btn-secondary"><i class="fa-solid fa-circle-info"></i></a>
                                 <a href="/deal_projects/edit/${data.id}" class="btn btn-warning"><i class="fa-solid fa-pen-to-square"></i></a>
@@ -58,7 +52,7 @@
                 },
             ],
         });
-        $("#table-prospect").on("click", ".delete-btn", function () {
+        $("#table-deal").on("click", ".delete-btn", function () {
             const surveyId = $(this).data("id");
             deleteSurvey(surveyId);
         });
@@ -67,9 +61,9 @@
     const createData = () => {
         $("#loading").show();
         $.ajax({
-            url: $("#survey-form").attr("action"),
+            url: $("#deal-form").attr("action"),
             type: "POST",
-            data: $("#survey-form").serialize(),
+            data: $("#deal-form").serialize(),
             headers: {
                 "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
             },
@@ -82,20 +76,27 @@
                     showConfirmButton: false,
                     timer: 1500,
                 }).then(() => {
-                    $("#table-survey").DataTable().ajax.reload();
-                    $("#survey-form")[0].reset();
-                    window.location.href = "/surveys";
+                    $("#table-deal").DataTable().ajax.reload();
+                    $("#deal-form")[0].reset();
+                    window.location.href = "/deal_projects";
                 });
             },
             error: function (xhr) {
                 $("#loading").hide();
-                const errors =
-                    xhr.responseJSON?.errors ||
-                    "There was a problem creating the prospect.";
+                const errors = xhr.responseJSON?.errors;
+                console.error("Submission errors:", errors);
+                let errorMessage = '';
+                if (typeof errors === 'object') {
+                    for (let field in errors) {
+                        errorMessage += `${field}: ${errors[field].join(', ')}\n`;
+                    }
+                } else {
+                    errorMessage = 'Terjadi kesalahan saat menyimpan data';
+                }
                 Swal.fire({
                     icon: "error",
                     title: "Error",
-                    text: errors,
+                    text: errorMessage
                 });
             },
         });
@@ -104,9 +105,9 @@
     const updateProspectData = () => {
         $("#loading").show();
         $.ajax({
-            url: $("#survey-form-edit").attr("action"),
+            url: $("#deal-form-edit").attr("action"),
             type: "POST",
-            data: $("#survey-form-edit").serialize(),
+            data: $("#deal-form-edit").serialize(),
             headers: {
                 "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
             },
@@ -119,20 +120,27 @@
                     showConfirmButton: false,
                     timer: 1500,
                 }).then(() => {
-                    $("#table-survey").DataTable().ajax.reload();
-                    $("#survey-form-edit")[0].reset();
-                    window.location.href = "/surveys";
+                    $("#table-deal").DataTable().ajax.reload();
+                    $("#deal-form-edit")[0].reset();
+                    window.location.href = "/deal_projects";
                 });
             },
             error: function (xhr) {
                 $("#loading").hide();
-                const errors =
-                    xhr.responseJSON?.errors ||
-                    "Gagal memperbarui data. Silakan coba lagi.";
+                const errors = xhr.responseJSON?.errors;
+                console.error("Submission errors:", errors);
+                let errorMessage = '';
+                if (typeof errors === 'object') {
+                    for (let field in errors) {
+                        errorMessage += `${field}: ${errors[field].join(', ')}\n`;
+                    }
+                } else {
+                    errorMessage = 'Terjadi kesalahan saat menyimpan data';
+                }
                 Swal.fire({
                     icon: "error",
                     title: "Error",
-                    text: errors,
+                    text: errorMessage
                 });
             },
         });
@@ -151,7 +159,7 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: `/surveys/destroy/${surveyId}`,
+                    url: `/deal_projects/destroy/${surveyId}`,
                     type: "DELETE",
                     headers: {
                         "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
@@ -163,7 +171,7 @@
                             text: `Survey dengan ID ${surveyId} telah dihapus.`,
                             timer: 2000,
                         });
-                        $("#table-survey").DataTable().ajax.reload();
+                        $("#table-deal").DataTable().ajax.reload();
                     },
                     error: function () {
                         Swal.fire({
@@ -184,8 +192,8 @@
                 submitFunction();
             });
         }
-        handleFormSubmit("#survey-form", createData);
-        handleFormSubmit("#survey-form-edit", updateProspectData);
+        handleFormSubmit("#deal-form", createData);
+        handleFormSubmit("#deal-form-edit", updateProspectData);
     });
 
     </script>

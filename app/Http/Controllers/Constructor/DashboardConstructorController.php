@@ -2,67 +2,51 @@
 
 namespace App\Http\Controllers\Constructor;
 
-use App\Charts\ProspectChart;
+use App\Charts\ProspectStatusChart;
 use App\Http\Controllers\Controller;
 use App\Models\Prospect;
 use Carbon\Carbon;
 
 class DashboardConstructorController extends Controller
 {
-    public function countProspekCurrentMonth()
+    public function index(ProspectStatusChart $chart)
     {
-        return Prospect::where('status', 'prospek')
+        // Count the status for this month
+        $countProspek = Prospect::where('status', 'prospek')
             ->whereYear('tanggal', Carbon::now()->year)
             ->whereMonth('tanggal', Carbon::now()->month)
             ->count();
-    }
 
-    public function countSurveyCurrentMonth()
-    {
-        return Prospect::where('status', 'survey')
+        $countSurvey = Prospect::where('status', 'survey')
             ->whereYear('tanggal', Carbon::now()->year)
             ->whereMonth('tanggal', Carbon::now()->month)
             ->count();
-    }
 
-    public function countDealCurrentMonth()
-    {
-        return Prospect::where('status', 'deal')
+        $countPenawaran = Prospect::where('status', 'penawaran')
             ->whereYear('tanggal', Carbon::now()->year)
             ->whereMonth('tanggal', Carbon::now()->month)
             ->count();
-    }
 
-    public function index()
-    {
+        $countDeal = Prospect::where('status', 'deal')
+            ->whereYear('tanggal', Carbon::now()->year)
+            ->whereMonth('tanggal', Carbon::now()->month)
+            ->count();
+        $data['chart'] = $chart->build();
+        $data['status'] = [
+            'prospek' => Prospect::where('status', 'prospek')->count(),
+            'survey' => Prospect::where('status', 'survey')->count(),
+            'penawaran' => Prospect::where('status', 'penawaran')->count(),
+            'deal' => Prospect::where('status', 'deal')->count(),
+        ];
+
+        // Pass the data to the view
         return view('contractor.index', [
-            'countProspek' => $this->countProspekCurrentMonth(),
-            'countSurvey' => $this->countSurveyCurrentMonth(),
-            'countDeal' => $this->countDealCurrentMonth(),
+            'countProspek' => $countProspek,
+            'countSurvey' => $countSurvey,
+            'countPenawaran' => $countPenawaran,
+            'countDeal' => $countDeal,
+            'chart' => $data['chart'],
+            'status' => $data['status'],
         ]);
-    }
-
-    public function dashboard(ProspectChart $chart)
-    {
-        $selectedYear = request('year', date('Y'));
-        if (!is_numeric($selectedYear) || $selectedYear < 1900 || $selectedYear > 2100) {
-            $selectedYear = date('Y');
-        }
-        $currentMonth = Carbon::now()->month;
-        $data['countProspek'] = Prospect::whereYear('created_at', $selectedYear)
-            ->whereMonth('created_at', $currentMonth)
-            ->where('status', 'prospek')
-            ->count();
-        $data['countSurvey'] = Prospect::whereYear('created_at', $selectedYear)
-            ->whereMonth('created_at', $currentMonth)
-            ->where('status', 'survey')
-            ->count();
-        $data['countDeal'] = Prospect::whereYear('created_at', $selectedYear)
-            ->whereMonth('created_at', $currentMonth)
-            ->where('status', 'deal')
-            ->count();
-        $data['selectedYear'] = $selectedYear;
-        $data['chart'] = $chart->setYear($selectedYear)->build();
-        return view('contractor.index', $data);
     }
 }

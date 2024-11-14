@@ -22,7 +22,6 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-        'position',
         'email',
         'password',
         'email_verified_at',
@@ -81,6 +80,16 @@ class User extends Authenticatable
     public function otpCode()
     {
         return $this->hasOne(OtpCodes::class, 'user_id');
+    }
+
+    public function divisionsPositions()
+    {
+        return $this->hasMany(UserDivisiPosition::class);
+    }
+
+    public function position()
+    {
+        return $this->belongsToMany(Position::class, 'user_divisi_positions')->withPivot('position_id');
     }
 
 }

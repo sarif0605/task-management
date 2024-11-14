@@ -20,4 +20,16 @@ class ReportProject extends Model
     public function deal_project(){
         return $this->belongsTo(DealProject::class, 'deal_project_id', 'id');
     }
+
+    public function constraints(){
+        return $this->hasMany(Constraints::class, 'report_project_id', 'id');
+    }
+
+    public function opnams(){
+        return $this->hasMany(Opnams::class, 'report_project_id', 'id');
+    }
+
+    public function materials(){
+        return $this->hasMany(Materials::class, 'report_project_id', 'id');
+    }
 }

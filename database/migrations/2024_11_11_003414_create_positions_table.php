@@ -11,12 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('kasbon_opnams', function (Blueprint $table) {
+        Schema::create('positions', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('opnam_id');
-            $table->foreign('opnam_id')->references('id')->on('opnams')->onDelete('cascade')->onUpdate('cascade');
-            $table->decimal('nominal', 15, 2);
-            $table->text('keterangan');
+            $table->string('name', 20);
             $table->timestamps();
         });
     }
@@ -26,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('kasbon_opnams');
+        Schema::dropIfExists('positions');
     }
 };

@@ -20,7 +20,8 @@ return new class extends Migration
             $table->date('birth_date');
             $table->string('address');
             $table->string('phone', 20);
-            $table->string('foto');
+            $table->string('image_url')->nullable();
+            $table->string('image_public_id')->nullable();
             $table->timestamps();
         });
     }

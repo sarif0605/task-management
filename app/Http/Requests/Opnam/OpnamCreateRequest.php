@@ -14,7 +14,7 @@ class OpnamCreateRequest extends FormRequest
         return true;
     }
 
-    /**
+     /**
      * Get the validation rules that apply to the request.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
@@ -22,10 +22,10 @@ class OpnamCreateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'deal_project_id' => 'required|exists:deal_projects,id',
-            'lokasi' => 'required',
-            'pekerjaan' => 'required',
-            'opnams' => 'required',
+            'report_project_id' => 'required|exists:report_projects,id',
+            // 'entries.*.lokasi' => 'required',
+            'entries.*.pekerjaan' => 'required',
+            'entries.*.date' => 'required',
         ];
     }
 }

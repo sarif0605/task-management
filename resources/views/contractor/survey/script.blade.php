@@ -1,5 +1,5 @@
 <script type="text/javascript">
-var userPosition = "{{ Auth::user()->position }}";
+var userPosition = "{{ Auth::user()->position->pluck('name')->join(', ') }}";
     $(document).ready(function () {
         $("#table-survey").DataTable({
             processing: true,
@@ -31,11 +31,11 @@ var userPosition = "{{ Auth::user()->position }}";
                     return data.length > 15 ? data.substring(0, 15) + "..." : data;
                 }
                  },
-                {
+                 {
                     data: "survey_images",
                     render: function (data, type, row) {
                         if (data && data.length > 0) {
-                            return `<img src="${data[0].image_link}" alt="Survey Image" style="width:50px;height:auto;">`;
+                            return `<img src="${data[0].image_url}" alt="Survey Image" style="width:50px;height:auto;">`;
                         }
                         return 'No image';
                     }
@@ -45,7 +45,7 @@ var userPosition = "{{ Auth::user()->position }}";
                     orderable: false,
                     searchable: false,
                     render: function (data) {
-                        if (userPosition === "sales") {
+                        if (userPosition === "Sales" || userPosition === "Admin") {
                             return `
                                 <a href="/surveys/show/${data.id}" class="btn btn-secondary"><i class="fa-solid fa-circle-info"></i></a>
                                 <a href="/surveys/edit/${data.id}" class="btn btn-warning"><i class="fa-solid fa-pen-to-square"></i></a>
@@ -89,13 +89,20 @@ var userPosition = "{{ Auth::user()->position }}";
             },
             error: function (xhr) {
                 $("#loading").hide();
-                const errors =
-                    xhr.responseJSON?.errors ||
-                    "There was a problem creating the prospect.";
+                const errors = xhr.responseJSON?.errors;
+                console.error("Submission errors:", errors);
+                let errorMessage = '';
+                if (typeof errors === 'object') {
+                    for (let field in errors) {
+                        errorMessage += `${field}: ${errors[field].join(', ')}\n`;
+                    }
+                } else {
+                    errorMessage = 'Terjadi kesalahan saat menyimpan data';
+                }
                 Swal.fire({
                     icon: "error",
                     title: "Error",
-                    text: errors,
+                    text: errorMessage
                 });
             },
         });
@@ -126,13 +133,20 @@ var userPosition = "{{ Auth::user()->position }}";
             },
             error: function (xhr) {
                 $("#loading").hide();
-                const errors =
-                    xhr.responseJSON?.errors ||
-                    "Gagal memperbarui data. Silakan coba lagi.";
+                const errors = xhr.responseJSON?.errors;
+                console.error("Submission errors:", errors);
+                let errorMessage = '';
+                if (typeof errors === 'object') {
+                    for (let field in errors) {
+                        errorMessage += `${field}: ${errors[field].join(', ')}\n`;
+                    }
+                } else {
+                    errorMessage = 'Terjadi kesalahan saat menyimpan data';
+                }
                 Swal.fire({
                     icon: "error",
                     title: "Error",
-                    text: errors,
+                    text: errorMessage
                 });
             },
         });

@@ -22,11 +22,11 @@ class ConstraintCreateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'operational_project_id' => 'required|exists:operational_projects,id',
-            'tanggal' => 'required|date',
-            'pekerjaan' => 'required',
-            'progress' => 'required',
-            'kendala' => 'required',
+            'report_project_id' => 'required|exists:report_projects,id',
+            'entries.*.tanggal' => 'required|date',
+            'entries.*.pekerjaan' => 'required',
+            'entries.*.progress' => 'required',
+            'entries.*.kendala' => 'required',
         ];
     }
 }

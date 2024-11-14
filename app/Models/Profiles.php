@@ -22,8 +22,7 @@ class Profiles extends Model
         'nik',
         'birth_date',
         'address',
-        'phone',
-        'foto',
+        'phone','image_url', 'image_public_id'
     ];
 
     public function user(){

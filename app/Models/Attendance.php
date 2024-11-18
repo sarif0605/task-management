@@ -6,24 +6,26 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class PenawaranProject extends Model
+class Attendance extends Model
 {
     use HasFactory, HasUuids;
+    protected $table = 'attendances';
     protected $primaryKey = "id";
-    protected $keyType = "string";
+    protected $keyType = 'string';
     public $incrementing = false;
     public $timestamps = true;
-    protected $table = "penawaran_projects";
-
     protected $fillable = [
-        'pembuat_penawaran',
-        'prospect_id',
-        'file_pdf',
-        'file_excel',
+        'user_id',
+        'in_image',
+        'in_time',
+        'in_info',
+        'out_image',
+        'out_time',
+        'out_info'
     ];
 
-    public function prospect()
+    public function user()
     {
-        return $this->belongsTo(Prospect::class);
+        return $this->belongsTo(User::class);
     }
 }

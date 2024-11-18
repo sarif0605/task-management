@@ -92,4 +92,9 @@ class User extends Authenticatable
         return $this->belongsToMany(Position::class, 'user_divisi_positions')->withPivot('position_id');
     }
 
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class);
+    }
+
 }

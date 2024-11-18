@@ -8,6 +8,7 @@ use App\Providers\RouteServiceProvider;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
 class AuthenticatedSessionController extends Controller
@@ -25,14 +26,20 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request)
     {
-        $request->authenticate();
-        $request->session()->regenerate();
-
-        if (Auth::user()->hasRole('kontraktor')) {
-            return redirect()->route('dashboard');
+        try {
+            $request->authenticate();
+            $request->session()->regenerate();
+            Log::info('User berhasil login');
+            if (Auth::user()->hasRole('kontraktor')) {
+                return redirect()->route('dashboard');
+            }
+            return redirect()->intended(RouteServiceProvider::HOME);
+        } catch (\Exception $e) {
+            Log::error('Login gagal', ['error' => $e->getMessage()]);
+            return redirect()->back()->withErrors([
+                'email' => 'Email atau password salah.',
+            ])->withInput(); // Mengembalikan input agar pengguna tidak perlu mengetik ulang
         }
-
-        return redirect()->intended(RouteServiceProvider::HOME);
     }
 
     /**

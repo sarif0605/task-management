@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Constructor;
 
+use App\Exports\ReportProjectsExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ReportProject\ReportProjectUpdateRequest;
 use App\Models\DealProject;
@@ -9,6 +10,7 @@ use App\Models\ReportProject;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ReportProjectController extends Controller
 {
@@ -27,6 +29,15 @@ class ReportProjectController extends Controller
             return response()->json(['data' => $materials]);
         }
         return view('contractor.report_project.index');
+    }
+
+    public function import(Request $request, $deal_project_id)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv',
+        ]);
+        Excel::import(new ReportProjectsExport($deal_project_id), $request->file('file'));
+        return redirect()->back()->with('success', 'Data berhasil diimport!');
     }
 
     /**

@@ -16,7 +16,8 @@ return new class extends Migration
             $table->string('nama_produk', 100)->nullable();
             $table->date('tanggal');
             $table->string('pemilik', 100)->nullable();
-            $table->string('lokasi', 200)->nullable();
+            $table->text('lokasi')->nullable();
+            $table->string('no_telp', 14)->nullable();
             $table->text('keterangan');
             $table->enum('status', ['prospek', 'survey', 'penawaran', 'deal'])->default('prospek')->nullable();
             $table->timestamps();

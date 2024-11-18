@@ -19,15 +19,11 @@
             <input type="date" name="tanggal" class="form-control form-control-underline" placeholder="Tanggal" value="{{ $prospect->tanggal }}" readonly>
         </div>
         <div class="col mb-3">
-            <label class="form-label">No Telp</label>
-            <input type="text" class="form-control form-control-underline" name="no_telp" placeholder="Lokasi" value="{{ $prospect->no_telp }}" readonly>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col mb-3">
             <label class="form-label">Lokasi</label>
             <textarea class="form-control form-control-underline" name="lokasi" placeholder="Lokasi" readonly>{{ $prospect->lokasi }}</textarea>
         </div>
+    </div>
+    <div class="row">
         <div class="col mb-3">
             <label class="form-label">Keterangan</label>
             <textarea class="form-control form-control-underline" name="keterangan" placeholder="Keterangan" readonly>{{ $prospect->keterangan }}</textarea>

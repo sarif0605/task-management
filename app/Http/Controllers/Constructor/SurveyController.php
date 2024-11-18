@@ -5,13 +5,14 @@ namespace App\Http\Controllers\Constructor;
 use App\Http\Requests\Survey\SurveyCreateRequest;
 use App\Http\Requests\Survey\SurveyUpdateRequest;
 use App\Models\Prospect;
-use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+use Illuminate\Support\Facades\File;
 use App\Models\Survey;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\SurveyImages;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class SurveyController extends Controller
 {
@@ -26,99 +27,113 @@ class SurveyController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $survey = Survey::with('prospect')->orderBy('created_at', 'DESC')->get();
+            $survey = Survey::with('prospect', 'survey_images')->orderBy('created_at', 'DESC')->get();
             return response()->json(['data' => $survey]);
         }
         return view('contractor.survey.index');
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create($prospect_id)
-    {
-        return view('contractor.survey.create', compact('prospect_id'));
-    }
-
     public function store(SurveyCreateRequest $request)
     {
-        try {
-            DB::beginTransaction();
-            $data = $request->validated();
-            $survey = new Survey($data);
-            $survey->prospect_id = $data['prospect_id'];
-            $survey->save();
-
-            if (isset($data['prospect_id'])) {
-                $prospect = Prospect::find($data['prospect_id']);
-                if ($prospect) {
-                    $prospect->status = 'survey';
-                    $prospect->save();
-                }
+        $data = $request->validated();
+        $survey = new Survey($data);
+        $survey->prospect_id = $data['prospect_id'];
+        $survey->save();
+        if (isset($data['prospect_id'])) {
+            $prospect = Prospect::find($data['prospect_id']);
+            if ($prospect) {
+                $prospect->status = 'survey';
+                $prospect->save();
             }
-
-            // Handle multiple image uploads
-            if ($request->hasFile('image')) {
-                foreach ($request->file('image') as $image) {
-                    $cloudinaryImage = $image->storeOnCloudinary('bnp');
-                    SurveyImages::create([
-                        'survey_id' => $survey->id,
-                        'image_url' => $cloudinaryImage->getSecurePath(),
-                        'image_public_id' => $cloudinaryImage->getPublicId()
-                    ]);
-                }
-            }
-
-            DB::commit();
-            return response()->json(['message' => 'Survey created successfully.'], 200);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Survey creation error: ' . $e->getMessage());
-            return response()->json(['error' => 'Failed to create survey: ' . $e->getMessage()], 500);
         }
+        return response()->json(['message' => 'Survey created successfully.'], 200);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
-    {
-        $survey = Survey::with('prospect')->find($id);
+
+     public function show($id) {
+        $survey = Survey::with('prospect', 'survey_images')->find($id);
         if (!$survey) {
-            return redirect()->route('surveys')
-            ->with('error', 'Survey dengan ID ' . $id . ' tidak ditemukan.');
+            return response()->json(['error' => 'Survey not found'], 404);
         }
-        return view('contractor.survey.show', compact('survey'));
+        return response()->json([
+            'survey' => $survey
+        ]);
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit($id)
     {
-        $survey = Survey::find($id);
-        $prospect = Prospect::all();
+        $survey = Survey::with('survey_images')->find($id);
         if (!$survey) {
-            return redirect()->route('surveys.edit')
-            ->with('error', 'Survey dengan ID ' . $id . ' tidak ditemukan.');
+            return response()->json([
+                'error' => 'Survey not found'
+            ], 404);
         }
-        return view('contractor.survey.edit', compact('survey', 'prospect'));
+        return response()->json([
+            'survey' => $survey
+        ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(SurveyUpdateRequest $request, string $id)
-    {
-        $survey = Survey::find($id);
-        if (!$survey) {
-            return redirect()->route('surveys.edit')
-            ->with('error', 'Survey dengan ID ' . $id . ' tidak ditemukan.');
-        }
+public function update(SurveyUpdateRequest $request, string $id)
+{
+    $survey = Survey::find($id);
+    if (!$survey) {
+        return response()->json([
+            'error' => 'Survey tidak ditemukan.'
+        ], 404);
+    }
+
+    try {
+        DB::beginTransaction();
         $data = $request->validated();
         $survey->update($data);
-        return redirect()->route('surveys')->with('success', 'Survey updated successfully.');
+        if ($survey->prospect_id) {
+            $prospect = Prospect::find($survey->prospect_id);
+            if ($prospect) {
+                $prospect->status = 'survey';
+                $prospect->save();
+            }
+        }
+        if ($request->has('deleted_images')) {
+            $deletedImages = json_decode($request->deleted_images);
+            foreach ($deletedImages as $imageId) {
+                $image = SurveyImages::find($imageId);
+                if ($image) {
+                    Storage::disk('local')->delete($image->image_url);
+                    $image->delete();
+                }
+            }
+        }
+
+        // Handle new images
+        if ($request->hasFile('image')) {
+            foreach ($request->file('image') as $image) {
+                $imageContent = file_get_contents($image->getRealPath());
+                $imageName = uniqid() . '_' . $image->getClientOriginalName();
+                Storage::disk('local')->put("public/survey/{$imageName}", $imageContent);
+                SurveyImages::create([
+                    'survey_id' => $survey->id,
+                    'image_url' => $imageName,
+                ]);
+            }
+        }
+
+        DB::commit();
+        return response()->json([
+            'message' => 'Survey updated successfully.'
+        ], 200);
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return response()->json([
+            'error' => 'Failed to update survey: ' . $e->getMessage()
+        ], 500);
     }
+}
 
     /**
      * Remove the specified resource from storage.
@@ -129,7 +144,22 @@ class SurveyController extends Controller
         if (!$survey) {
             return response()->json(['message' => 'Survey not found'], 404);
         }
-        $survey->delete();
-        return response()->json(['message' => 'Survey deleted successfully'], 200);
+        try {
+            DB::beginTransaction();
+            foreach ($survey->images as $image) {
+                $imagePath = str_replace('/storage', 'public', $image->image_url);
+                if (Storage::exists($imagePath)) {
+                    Storage::delete($imagePath);
+                }
+                $image->delete();
+            }
+            $survey->delete();
+            DB::commit();
+            return response()->json(['message' => 'Survey deleted successfully'], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Survey deletion error: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to delete survey: ' . $e->getMessage()], 500);
+        }
     }
 }

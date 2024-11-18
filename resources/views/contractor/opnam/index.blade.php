@@ -20,7 +20,7 @@
             </tr>
         </thead>
     </table>
-    @push('scripts')
+    @push('js')
         @include('contractor.opnam.script')
     @endpush
 @endsection

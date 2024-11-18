@@ -11,6 +11,7 @@ use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class PenawaranProjectController extends Controller
 {
@@ -44,169 +45,163 @@ class PenawaranProjectController extends Controller
      */
     public function show(string $id)
     {
-        $penawaran_project = PenawaranProject::with('prospect')->find($id);
-        if (!$penawaran_project) {
-            return redirect()->route('penawaran_projects')
-            ->with('error', 'Penawaran Project dengan ID ' . $id . ' tidak ditemukan.');
+        $penawaran = PenawaranProject::with('prospect')->find($id);
+        if (!$penawaran) {
+            return response()->json(['error' => 'Penawaran not found'], 404);
         }
-        return view('contractor.penawaran_project.show', compact('survey'));
+        return response()->json([
+            'penawaran' => $penawaran
+        ]);
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit($id)
     {
-        $penawaran_project = PenawaranProject::find($id);
-        $prospect = Prospect::all();
-        if (!$penawaran_project) {
-            return redirect()->route('penawaran_projects.edit')
-            ->with('error', 'Penawaran Project dengan ID ' . $id . ' tidak ditemukan.');
+        $penawaran = PenawaranProject::find($id);
+        if (!$penawaran) {
+            return response()->json([
+                'error' => 'Survey not found'
+            ], 404);
         }
-        return view('contractor.survey.edit', compact('survey', 'prospect'));
+        return response()->json([
+            'penawaran' => $penawaran
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
+    // public function update(PenawaranProjectUpdateRequest $request, string $id)
+    // {
+    //     $penawaranProject = PenawaranProject::find($id);
+    //     if (!$penawaranProject) {
+    //         return redirect()->route('penawaran_projects.edit', $id)
+    //             ->with('error', 'Penawaran Project dengan ID ' . $id . ' tidak ditemukan.');
+    //     }
+
+    //     DB::beginTransaction();
+    //     try {
+    //         $data = $request->validated();
+    //         if ($request->hasFile('file_pdf')) {
+    //             if ($penawaranProject->file_pdf) {
+    //                 $oldPdfPath = str_replace('/storage', 'public/pdf', $penawaranProject->file_pdf);
+    //                 if (Storage::exists($oldPdfPath)) {
+    //                     Storage::delete($oldPdfPath);
+    //                 }
+    //             }
+    //             $pdfFile = $request->file('file_pdf');
+    //             $pdfContent = file_get_contents($pdfFile->getRealPath());
+    //             $pdfName = uniqid() . '_' . $pdfFile->getClientOriginalName();
+    //             Storage::disk('local')->put("public/pdf/{$pdfName}", $pdfContent);
+    //             $data['file_pdf'] = $pdfName;
+    //         }
+    //         if ($request->hasFile('file_excel')) {
+    //             if ($penawaranProject->file_excel) {
+    //                 $oldExcelPath = str_replace('/storage', 'public/excel', $penawaranProject->file_excel);
+    //                 if (Storage::exists($oldExcelPath)) {
+    //                     Storage::delete($oldExcelPath);
+    //                 }
+    //             }
+    //             $excelFile = $request->file('file_excel');
+    //             $excelContent = file_get_contents($excelFile->getRealPath());
+    //             $excelName = uniqid() . '_' . $excelFile->getClientOriginalName();
+    //             Storage::disk('local')->put("public/excel/{$excelName}", $excelContent);
+    //             $data['file_excel'] = $excelName;
+    //         }
+    //         $penawaranProject->update($data);
+    //         DB::commit();
+    //         return redirect()->route('penawaran_projects')
+    //             ->with('success', 'Penawaran Project berhasil diperbarui.');
+    //     } catch (\Exception $e) {
+    //         DB::rollBack();
+    //         Log::error('Penawaran Project Update Failed:', [
+    //             'message' => $e->getMessage(),
+    //             'file' => $e->getFile(),
+    //             'line' => $e->getLine(),
+    //             'trace' => $e->getTraceAsString()
+    //         ]);
+    //         return redirect()->route('penawaran_projects.edit', $id)
+    //             ->with('error', 'Gagal memperbarui Penawaran Project: ' . $e->getMessage());
+    //     }
+    // }
+
     public function update(PenawaranProjectUpdateRequest $request, string $id)
     {
-        $penawaran_project = PenawaranProject::find($id);
-        if (!$penawaran_project) {
-            return redirect()->route('penawaran_projects.edit')
-            ->with('error', 'Penawaran Project dengan ID ' . $id . ' tidak ditemukan.');
+        $penawaranProject = PenawaranProject::find($id);
+        if (!$penawaranProject) {
+            return redirect()->route('penawaran_projects.edit', $id)
+                ->with('error', 'Penawaran Project dengan ID ' . $id . ' tidak ditemukan.');
         }
-        $data = $request->validated();
-        $penawaran_project->update($data);
-        return redirect()->route('penawaran_projects')->with('success', 'Survey updated successfully.');
-    }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function store(PenawaranProjectCreateRequest $request)
-    {
         DB::beginTransaction();
         try {
             $data = $request->validated();
-            $prospect = Prospect::findOrFail($data['prospect_id']);
-            if ($prospect->status === 'penawaran') {
-                throw new \Exception('Penawaran sudah dibuat untuk prospect ini.');
-            }
-            $penawaran_project = new PenawaranProject();
-            $penawaran_project->pembuat_penawaran = $data['pembuat_penawaran'];
-            $penawaran_project->prospect_id = $data['prospect_id'];
+
+            // Handle PDF file update
             if ($request->hasFile('file_pdf')) {
-                try {
-                    $cloudinaryPdf = $this->uploadToCloudinary(
-                        $request->file('file_pdf'),
-                        'bnp/pdfs'
-                    );
-                    $penawaran_project->file_pdf = $cloudinaryPdf['secure_path'];
-                    $penawaran_project->pdf_public_id = $cloudinaryPdf['public_id'];
-                } catch (\Exception $e) {
-                    Log::error('PDF Upload Error:', [
-                        'error' => $e->getMessage(),
-                        'file' => $e->getFile(),
-                        'line' => $e->getLine()
-                    ]);
-                    throw new \Exception('Gagal mengupload file PDF: ' . $e->getMessage());
+                if ($penawaranProject->file_pdf) {
+                    $oldPdfPath = "public/pdf/{$penawaranProject->file_pdf}"; // Adjusted path
+                    if (Storage::exists($oldPdfPath)) {
+                        Storage::delete($oldPdfPath);
+                    }
                 }
+
+                $pdfFile = $request->file('file_pdf');
+                $pdfName = uniqid() . '_' . $pdfFile->getClientOriginalName();
+                $pdfFile->storeAs('public/pdf', $pdfName);
+                $data['file_pdf'] = $pdfName;
             }
+
+            // Handle Excel file update
             if ($request->hasFile('file_excel')) {
-                try {
-                    $cloudinaryExcel = $this->uploadToCloudinary(
-                        $request->file('file_excel'),
-                        'bnp/excels'
-                    );
-                    $penawaran_project->file_excel = $cloudinaryExcel['secure_path'];
-                    $penawaran_project->excel_public_id = $cloudinaryExcel['public_id'];
-                } catch (\Exception $e) {
-                    Log::error('Excel Upload Error:', [
-                        'error' => $e->getMessage(),
-                        'file' => $e->getFile(),
-                        'line' => $e->getLine()
-                    ]);
-                    throw new \Exception('Gagal mengupload file Excel: ' . $e->getMessage());
+                if ($penawaranProject->file_excel) {
+                    $oldExcelPath = "public/excel/{$penawaranProject->file_excel}"; // Adjusted path
+                    if (Storage::exists($oldExcelPath)) {
+                        Storage::delete($oldExcelPath);
+                    }
                 }
+
+                $excelFile = $request->file('file_excel');
+                $excelName = uniqid() . '_' . $excelFile->getClientOriginalName();
+                $excelFile->storeAs('public/excel', $excelName);
+                $data['file_excel'] = $excelName;
             }
-            $penawaran_project->save();
-            $prospect->status = 'penawaran';
-            $prospect->save();
+
+            $penawaranProject->update($data);
+
             DB::commit();
-            Log::info('Penawaran Creation Success', [
-                'penawaran_id' => $penawaran_project->id,
-                'prospect_id' => $prospect->id
-            ]);
-            return response()->json([
-                'message' => 'Penawaran berhasil dibuat',
-                'data' => $penawaran_project
-            ], 201);
+            return redirect()->route('penawaran_projects')
+                ->with('success', 'Penawaran Project berhasil diperbarui.');
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Penawaran Creation Failed:', [
+            Log::error('Penawaran Project Update Failed:', [
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString()
             ]);
-            $statusCode = $this->determineStatusCode($e);
-            return response()->json([
-                'error' => 'Gagal membuat penawaran',
-                'message' => $e->getMessage()
-            ], $statusCode);
+            return redirect()->route('penawaran_projects.edit', $id)
+                ->with('error', 'Gagal memperbarui Penawaran Project: ' . $e->getMessage());
         }
     }
 
-    /**
-     * Upload file to Cloudinary
-     */
-    private function uploadToCloudinary($file, $folder)
+    public function store(PenawaranProjectCreateRequest $request)
     {
-        $cloudinaryFile = $file->storeOnCloudinary($folder);
-        if (!$cloudinaryFile) {
-            throw new \Exception('Upload ke Cloudinary gagal');
+        $data = $request->validated();
+        $penawaran = new PenawaranProject($data);
+        $penawaran->prospect_id = $data['prospect_id'];
+        $penawaran->save();
+        if (isset($data['prospect_id'])) {
+            $prospect = Prospect::find($data['prospect_id']);
+            if ($prospect) {
+                $prospect->status = 'penawaran';
+                $prospect->save();
+            }
         }
-        return [
-            'secure_path' => $cloudinaryFile->getSecurePath(),
-            'public_id' => $cloudinaryFile->getPublicId()
-        ];
+        return response()->json(['message' => 'Penawaran created successfully.'], 200);
     }
-
-    /**
-     * Determine appropriate HTTP status code based on exception
-     */
-    private function determineStatusCode(\Exception $e): int
-    {
-        if ($e instanceof \Illuminate\Database\Eloquent\ModelNotFoundException) {
-            return 404;
-        }
-        if ($e instanceof \Illuminate\Validation\ValidationException) {
-            return 422;
-        }
-        return 500;
-    }
-
-    /**
-     * Download penawaran file
-     */
-    public function download(Request $request)
-    {
-        $id = $request->input('id');
-        $type = $request->input('type');
-        $penawaran_project = PenawaranProject::findOrFail($id);
-        if ($type === 'pdf') {
-            $filePath = $penawaran_project->file_pdf;
-        } else {
-            $filePath = $penawaran_project->file_excel;
-        }
-        $headers = [
-            'Content-Type' => 'application/octet-stream',
-            'Content-Disposition' => 'attachment; filename="' . basename($filePath) . '"',
-        ];
-        return response()->download($filePath, basename($filePath), $headers);
-    }
-
     /**
      * Delete penawaran project
      */
@@ -215,13 +210,23 @@ class PenawaranProjectController extends Controller
         DB::beginTransaction();
         try {
             $penawaran = PenawaranProject::findOrFail($id);
-
-            // Delete files from Cloudinary
             if ($penawaran->pdf_public_id) {
                 Cloudinary::destroy($penawaran->pdf_public_id);
             }
             if ($penawaran->excel_public_id) {
                 Cloudinary::destroy($penawaran->excel_public_id);
+            }
+            if ($penawaran->file_pdf) {
+                $pdfPath = str_replace('/storage', 'public', $penawaran->file_pdf);
+                if (Storage::exists($pdfPath)) {
+                    Storage::delete($pdfPath);
+                }
+            }
+            if ($penawaran->file_excel) {
+                $excelPath = str_replace('/storage', 'public', $penawaran->file_excel);
+                if (Storage::exists($excelPath)) {
+                    Storage::delete($excelPath);
+                }
             }
             $prospect = $penawaran->prospect;
             if ($prospect && $prospect->status === 'penawaran') {
@@ -245,5 +250,17 @@ class PenawaranProjectController extends Controller
                 'message' => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function downloadFile($id, $type)
+    {
+        $penawaran = PenawaranProject::findOrFail($id);
+        $folderPath = $type === 'pdf' ? 'public/pdf' : 'public/excel';
+        $fileName = $type === 'pdf' ? $penawaran->file_pdf : $penawaran->file_excel;
+        $filePath = "{$folderPath}/{$fileName}";
+        if (!Storage::exists($filePath)) {
+            return response()->json(['message' => 'File not found'], 404);
+        }
+        return Storage::download($filePath);
     }
 }

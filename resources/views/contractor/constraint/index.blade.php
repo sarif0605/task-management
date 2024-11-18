@@ -22,7 +22,7 @@
             </tr>
         </thead>
     </table>
-    @push('scripts')
+    @push('js')
         @include('contractor.constraint.script')
     @endpush
 @endsection

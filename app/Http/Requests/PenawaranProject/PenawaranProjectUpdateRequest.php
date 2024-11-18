@@ -11,7 +11,7 @@ class PenawaranProjectUpdateRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,9 @@ class PenawaranProjectUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'pembuat_penawaran' => 'nullable|string|max:30',
+            'file_pdf' => 'nullable|file|mimes:pdf|max:10240',
+            'file_excel' => 'nullable|file|mimes:xlsx,xls|max:10240',
         ];
     }
 }

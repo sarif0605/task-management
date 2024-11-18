@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Constructor\AttendanceController;
 use App\Http\Controllers\Constructor\ConstraintController;
 use App\Http\Controllers\Constructor\DashboardConstructorController;
 use App\Http\Controllers\Constructor\DealProjectController;
@@ -52,9 +53,17 @@ Route::middleware('auth')->group(function () {
         Route::delete('destroy/{id}', 'destroy')->name('users.destroy');
     });
 
+    Route::controller(AttendanceController::class)->prefix('attendance')->group(function () {
+        Route::get('', 'index')->name('attendance');
+        Route::get('create', 'create')->name('attendance.create');
+        Route::post('store', 'store')->name('attendance.store'); // This handles the POST request
+        Route::get('edit', 'edit')->name('attendance.edit');
+        Route::put('update', 'update')->name('attendance.update');
+    });
+
     Route::controller(ProspectController::class)->prefix('prospects')->group(function () {
         Route::get('', 'index')->name('prospects');
-        Route::get('/export', 'export')->name('prospects.export');
+        Route::post('export', 'export')->name('prospects.export');
         Route::get('create', 'create')->name('prospects.create');
         Route::post('store', 'store')->name('prospects.store');
         Route::get('show/{id}', 'show')->name('prospects.show');
@@ -95,32 +104,29 @@ Route::middleware('auth')->group(function () {
 
     Route::controller(PenawaranProjectController::class)->prefix('penawaran_projects')->group(function () {
         Route::get('', 'index')->name('penawaran_projects');
-        Route::get('create/{prospect_id}', 'create')->name('penawaran_projects.create');
         Route::post('store', 'store')->name('penawaran_projects.store');
         Route::get('show/{id}', 'show')->name('penawaran_projects.show');
         Route::get('edit/{id}', 'edit')->name('penawaran_projects.edit');
         Route::put('update/{id}', 'update')->name('penawaran_projects.update');
         Route::delete('destroy/{id}', 'destroy')->name('penawaran_projects.destroy');
-        Route::post('download', 'download')->name('penawaran_projects.download');
+        Route::post('download/{id}/{type}', 'downloadFile')->name('penawaran_projects.download');
     });
 
     Route::controller(SurveyController::class)->prefix('surveys')->group(function () {
         Route::get('', 'index')->name('surveys');
-        Route::get('create/{prospect_id}', 'create')->name('surveys.create');
         Route::post('store', 'store')->name('surveys.store');
         Route::get('show/{id}', 'show')->name('surveys.show');
         Route::get('edit/{id}', 'edit')->name('surveys.edit');
-        Route::put('edit/{id}', 'update')->name('surveys.update');
+        Route::put('update/{id}', 'update')->name('surveys.update');
         Route::delete('destroy/{id}', 'destroy')->name('surveys.destroy');
     });
 
     Route::controller(DealProjectController::class)->prefix('deal_projects')->group(function () {
         Route::get('', 'index')->name('deal_projects');
-        Route::get('create/{prospect_id}', 'create')->name('deal_projects.create');
         Route::post('store', 'store')->name('deal_projects.store');
         Route::get('show/{id}', 'show')->name('deal_projects.show');
         Route::get('edit/{id}', 'edit')->name('deal_projects.edit');
-        Route::put('edit/{id}', 'update')->name('deal_projects.update');
+        Route::put('update/{id}', 'update')->name('deal_projects.update');
         Route::delete('destroy/{id}', 'destroy')->name('deal_projects.destroy');
     });
 
@@ -129,6 +135,7 @@ Route::middleware('auth')->group(function () {
         Route::get('create/{deal_project_id}', 'create')->name('report_projects.create');
         Route::post('store', 'store')->name('report_projects.store');
         Route::get('show/{id}', 'show')->name('report_projects.show');
+        Route::post('export/{deal_project_id}', 'import')->name('report_projects.export');
         Route::get('edit/{id}', 'edit')->name('report_projects.edit');
         Route::put('edit/{id}', 'update')->name('report_projects.update');
         Route::delete('destroy/{id}', 'destroy')->name('report_projects.destroy');

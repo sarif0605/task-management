@@ -18,7 +18,7 @@
     @csrf
         <button type="submit" class="btn btn-secondary btn-user btn-block">Kirim Ulang OTP</button>
 </form>
-@push('scripts')
+@push('js')
     @include('auth.script')
 @endpush
 @endsection

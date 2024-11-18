@@ -25,13 +25,46 @@
                     return data ? data : "N/A";
                 }
             },
-            { data: "status" },
-            { data: "start_date" },
-            { data: "end_date" },
-            { data: "bobot" },
-            { data: "progress" },
-            { data: "durasi" },
-            { data: "harian" },
+            { data: "pekerjaan",
+                render: function (data) {
+                    return data ? data : "N/A";
+                }
+             },
+            { data: "status",
+                render: function (data) {
+                    return data ? data : "N/A";
+                }
+             },
+            { data: "start_date",
+            render: function (data) {
+                    return data ? data : "N/A";
+                }
+             },
+            { data: "end_date",
+            render: function (data) {
+                    return data ? data : "N/A";
+                }
+             },
+            { data: "bobot",
+            render: function (data) {
+                    return data ? data : "N/A";
+                }
+             },
+            { data: "progress",
+            render: function (data) {
+                    return data ? data : "N/A";
+                }
+             },
+            { data: "durasi",
+            render: function (data) {
+                    return data ? data : "N/A";
+                }
+             },
+            { data: "harian",
+            render: function (data) {
+                    return data ? data : "N/A";
+                }
+             },
             {
                 data: null,
                 orderable: false,

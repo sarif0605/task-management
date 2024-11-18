@@ -25,25 +25,34 @@ class ProspectController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $prospects = Prospect::orderBy('created_at', 'DESC')->get();
+            $prospects = Prospect::withCount('survey')
+                ->withCount('penawaran_project')
+                ->withCount('deal_project')
+                ->orderBy('created_at', 'DESC')
+                ->get();
+
             return response()->json(['data' => $prospects]);
         }
 
+        // Mengambil data users dengan relasi profile dan position, kecuali Admin
         $users = User::with(['profile', 'position'])
-        ->whereDoesntHave('position', function($query) {
-            $query->where('name', 'Admin');
-        })
-        ->get();
+            ->whereDoesntHave('position', function ($query) {
+                $query->where('name', 'Admin');
+            })
+            ->get();
 
+        // Return view dengan data users
         return view('contractor.prospect.index', compact('users'));
     }
 
-    public function export()
+    public function export(Request $request)
     {
-        return Excel::download(new ProspectExport, 'prospects-'. Carbon::now()->timestamp . '.xlsx');
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv',
+        ]);
+        Excel::import(new ProspectExport, $request->file('file'));
+        return redirect()->back()->with('success', 'Data berhasil diimport!');
     }
-
-    //
 
     /**
      * Show the form for creating a new resource.

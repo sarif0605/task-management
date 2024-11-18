@@ -66,11 +66,11 @@
         </div>
     </form>
 
-@push('scripts')
+@push('js')
     @include('contractor.report_project.script')
 @endpush
 
-@push('scripts')
+@push('js')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     let entryCount = 0;

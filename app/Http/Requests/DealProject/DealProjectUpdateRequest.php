@@ -26,11 +26,13 @@ class DealProjectUpdateRequest extends FormRequest
     {
         return [
             'prospect_id' => 'nullable|exists:prospects,id',
-            'date' => 'nullable|date',
-            'price_quotation' => 'nullable|numeric',
-            'nominal' => 'nullable|numeric',
-            'keterangan' => 'nullable|string',
-            'users' => 'nullable|array'
+            'date' => 'required|date',
+            'harga_deal' => 'nullable|numeric|min:0',
+            'keterangan' => 'nullable|string|max:1000',
+            'users' => 'nullable|array|min:1',
+            'users.*' => 'nullable|exists:users,id',
+            'rab' => 'nullable|file|max:10240',
+            'rap' => 'nullable|file|max:10240',
         ];
     }
     public function withValidator(Validator $validator)
@@ -50,18 +52,5 @@ class DealProjectUpdateRequest extends FormRequest
                 }
             }
         });
-    }
-
-    public function messages(){
-        return [
-            'date.nullable' => 'Tanggal DealProject tidak boleh null.',
-            'date.date' => 'Tanggal DealProject harus dalam format tanggal yang valid.',
-            'users.array' => 'Users harus berupa array.',
-            'users.*' => 'Setiap user harus valid.',
-            'prospect_id.exists' => 'Prospect yang dipilih tidak ditemukan.',
-            'nominal.numeric' => 'Nominal harus berupa angka.',
-            'lokasi.max' => 'Lokasi maksimum 200 karakter.',
-            'keterangan.max' => 'Keterangan maksimum 200 karakter.',
-        ];
     }
 }

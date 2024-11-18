@@ -48,7 +48,7 @@
             </div>
         </div>
     </form>
-    @push('scripts')
+    @push('js')
         @include('contractor.prospect.script')
     @endpush
 @endsection

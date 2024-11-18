@@ -22,7 +22,7 @@
         </thead>
       </table>
 
-    @push('scripts')
+    @push('js')
         @include('contractor.user.script')
     @endpush
 @endsection

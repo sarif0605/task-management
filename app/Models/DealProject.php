@@ -14,7 +14,7 @@ class DealProject extends Model
     protected $keyType = "string";
     public $incrementing = false;
     public $timestamps = true;
-    protected $fillable = ['prospect_id', 'date', 'harga_deal', 'keterangan'];
+    protected $fillable = ['prospect_id', 'date', 'harga_deal', 'keterangan', 'rab', 'rap'];
 
     public function prospect()
     {

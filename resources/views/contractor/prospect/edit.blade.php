@@ -23,15 +23,23 @@
                 <label class="form-label">Tanggal</label>
                 <input type="date" name="tanggal" class="form-control form-control-underline" placeholder="Tanggal" value="{{ $prospect->tanggal }}" >
             </div>
-            <div class="col mb-3">
-                <label class="form-label">Lokasi</label>
-                <textarea class="form-control form-control-underline" name="lokasi" placeholder="Lokasi" >{{ $prospect->lokasi }}</textarea>
+            <div class="col">
+                <label for="no_telp">No Telp</label>
+                <input type="number" name="no_telp" class="form-control" placeholder="No Telp" value="{{ $prospect->no_telp }}">
             </div>
         </div>
         <div class="row">
             <div class="col mb-3">
                 <label class="form-label">Keterangan</label>
                 <textarea class="form-control form-control-underline" name="keterangan" placeholder="Keterangan" >{{ $prospect->keterangan }}</textarea>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col mb-3">
+                <div class="col mb-3">
+                    <label class="form-label">Lokasi</label>
+                    <textarea class="form-control form-control-underline" name="lokasi" placeholder="Lokasi" >{{ $prospect->lokasi }}</textarea>
+                </div>
             </div>
         </div>
         <button class="btn btn-primary">Update</button>
@@ -52,7 +60,7 @@
             box-shadow: none;
         }
     </style>
-    @push('scripts')
+    @push('js')
         @include('contractor.prospect.script')
     @endpush
 @endsection

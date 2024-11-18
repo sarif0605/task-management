@@ -48,7 +48,9 @@
             <x-input-label for="image_url" :value="__('Foto')" />
             @if ($user->profile && $user->profile->image_url)
                 <div class="mb-3">
-                    <img src="{{ asset($user->profile->image_url) }}" alt="Profile Image" class="h-20 w-20 rounded-full object-cover">
+                    <img src="{{ asset('storage/profile/' . $user->profile->image_url) }}"
+                 alt="Profile Image"
+                 class="h-20 w-20 rounded-full object-cover">
                 </div>
             @endif
             <input id="image" name="image" type="file" class="mt-1 block w-full" accept="image/*">
@@ -94,6 +96,6 @@
         </div>
     </form>
 </section>
-@push('scripts')
+@push('js')
     @include('profile.partials.script')
 @endpush

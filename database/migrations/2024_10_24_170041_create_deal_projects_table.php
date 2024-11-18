@@ -15,9 +15,11 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->uuid('prospect_id');
             $table->foreign('prospect_id')->references('id')->on('prospects')->onDelete('cascade')->onUpdate('cascade');
-            $table->date('date');
-            $table->decimal('harga_deal', 15, 2);
-            $table->text('keterangan');
+            $table->date('date')->nullable();
+            $table->decimal('harga_deal', 15, 2)->nullable();
+            $table->string('rab')->nullable();
+            $table->string('rap')->nullable();
+            $table->text('keterangan')->nullable();
             $table->timestamps();
         });
     }

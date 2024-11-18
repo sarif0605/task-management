@@ -7,7 +7,6 @@ function handleFormSubmit(formSelector, submitFunction) {
 }
 
 loginUser = () => {
-    console.log("Login function called");
     $("#loading").show();
     $.ajax({
         url: $("#login-form").attr("action"),
@@ -30,20 +29,25 @@ loginUser = () => {
             });
         },
         error: function (xhr) {
-            console.log("Login failed", xhr);
             $("#loading").hide();
-            const errors = xhr.responseJSON?.errors || "There was a problem creating the prospect.";
-            Swal.fire({
-                icon: "error",
-                title: "Error",
-                text: errors,
-            });
+            if (xhr.responseJSON?.errors) {
+                const errors = xhr.responseJSON.errors;
+                for (const [key, messages] of Object.entries(errors)) {
+                    const errorField = $(`input[name="${key}"]`).next(".text-danger");
+                    errorField.text(messages[0]);
+                }
+            } else {
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "Email atau Password salah.",
+                });
+            }
         },
     });
 };
 
 registerUser = () => {
-    console.log("Login function called");
     $("#loading").show();
     $.ajax({
         url: $("#register-form").attr("action"),
@@ -53,12 +57,11 @@ registerUser = () => {
             "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
         },
         success: function (response) {
-            console.log("register successful");
             $("#loading").hide();
             Swal.fire({
                 position: "top-end",
                 icon: "success",
-                title: "Berhasil Registrasi!",
+                title: "Berhasil Melakukan Registrasi dan cek email mu!",
                 showConfirmButton: false,
                 timer: 1500,
             }).then(() => {
@@ -66,20 +69,24 @@ registerUser = () => {
             });
         },
         error: function (xhr) {
-            console.log("Login failed", xhr);
-            $("#loading").hide();
-            const errors = xhr.responseJSON?.errors || "There was a problem creating the prospect.";
-            Swal.fire({
-                icon: "error",
-                title: "Error",
-                text: errors,
-            });
+            if (xhr.responseJSON?.errors) {
+                const errors = xhr.responseJSON.errors;
+                for (const [key, messages] of Object.entries(errors)) {
+                    const errorField = $(`input[name="${key}"]`).next(".text-danger");
+                    errorField.text(messages[0]);
+                }
+            } else {
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "Proses Registrasimu Gagal.",
+                });
+            }
         },
     });
 };
 
 verifikasiUser = () => {
-    console.log("Verifikasi function called");
     $("#loading").show();
     $.ajax({
         url: $("#form-verifikasi").attr("action"),
@@ -102,14 +109,20 @@ verifikasiUser = () => {
             });
         },
         error: function (xhr) {
-            console.log("Login failed", xhr);
             $("#loading").hide();
-            const errors = xhr.responseJSON?.errors || "There was a problem creating the prospect.";
-            Swal.fire({
-                icon: "error",
-                title: "Error",
-                text: errors,
-            });
+            if (xhr.responseJSON?.errors) {
+                const errors = xhr.responseJSON.errors;
+                for (const [key, messages] of Object.entries(errors)) {
+                    const errorField = $(`input[name="${key}"]`).next(".text-danger");
+                    errorField.text(messages[0]);
+                }
+            } else {
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "Proses Verifikasi Akun Gagal.",
+                });
+            }
         },
     });
 };

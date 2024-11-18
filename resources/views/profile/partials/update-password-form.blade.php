@@ -44,6 +44,6 @@
     </form>
 </section>
 
-@push('scripts')
+@push('js')
     @include('profile.partials.script')
 @endpush

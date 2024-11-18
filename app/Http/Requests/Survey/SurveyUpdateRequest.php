@@ -30,7 +30,6 @@ class SurveyUpdateRequest extends FormRequest
         return [
             'date' => [
                 'nullable',
-                'date',
                 function ($attribute, $value, $fail) use ($prospectDate) {
                     if ($prospectDate && $value < $prospectDate) {
                         $fail('The survey date cannot be before the prospect date.');
@@ -39,7 +38,7 @@ class SurveyUpdateRequest extends FormRequest
             ],
             'prospect_id' => ['nullable', 'exists:prospects,id'],
             'survey_results' => ['nullable'],
-            'images.*' => 'nullable|mimes:jpeg,png,jpg,gif|max:2048',
+            'image.*' => 'nullable|mimes:jpeg,png,jpg,gif|max:2048',
         ];
     }
 

@@ -27,6 +27,12 @@
   </li>
 @endif
 
+<li class="nav-item">
+    <a class="nav-link" href="{{ route('attendance') }}">
+      <i class="fas fa-fw fa-tachometer-alt"></i>
+      <span>Absensi</span></a>
+  </li>
+
   <li class="nav-item">
     <a class="nav-link" href="{{ route('prospects') }}">
       <i class="fas fa-fw fa-tachometer-alt"></i>

@@ -3,17 +3,16 @@
 @section('title', 'Home Report Project')
 
 @section('content')
-    {{-- <div class="d-flex align-items-center justify-content-between mb-2">
-        @if (Auth::user()->position == 'sales' || Auth::user()->position == 'admin')
-            <a href="{{ route('report_projects.create') }}" class="btn btn-primary"><i class="fa-solid fa-square-plus"></i> Add</a>
-        @endif
-    </div> --}}
+    <div class="d-flex align-items-center justify-content-between mb-2">
+
+    </div>
     <hr class="mb-1" />
     <table id="table-report" class="table table-hover">
         <thead class="table-primary">
             <tr>
                 <th>#</th>
                 <th>Nama Produk</th>
+                <th>Pekerjaan</th>
                 <th>status</th>
                 <th>Mulai</th>
                 <th>Akhir</th>
@@ -25,7 +24,7 @@
             </tr>
         </thead>
     </table>
-    @push('scripts')
+    @push('js')
         @include('contractor.report_project.script')
     @endpush
 @endsection

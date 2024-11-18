@@ -15,11 +15,9 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->uuid('prospect_id');
             $table->foreign('prospect_id')->references('id')->on('prospects')->onDelete('cascade')->onUpdate('cascade');
-            $table->string('pembuat_penawaran');
-            $table->string('file_pdf');
-            $table->string('pdf_public_id');
-            $table->string('file_excel');
-            $table->string('excel_public_id');
+            $table->string('pembuat_penawaran')->nullable();
+            $table->string('file_pdf')->nullable();
+            $table->string('file_excel')->nullable();
             $table->timestamps();
         });
     }

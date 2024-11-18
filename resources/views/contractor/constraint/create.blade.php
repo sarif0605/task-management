@@ -43,7 +43,7 @@
     </div>
 </form>
 
-@push('scripts')
+@push('js')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     let entryCount = 0;

@@ -25,7 +25,14 @@ class ProspectUpdateRequest extends FormRequest
              'nama_produk' => 'nullable',
              'tanggal' => 'nullable|date',
              'pemilik' => 'nullable',
-             'lokasi' => 'nullable',
+             'no_telp' => ['nullable', 'numeric', 'regex:/^62[0-9]+$/'],
+             'lokasi' => [ 'nullable','url',
+                            function ($attribute, $value, $fail) {
+                                if (!str_contains($value, 'google.com/maps')) {
+                                    $fail('Lokasi harus berupa URL Google Maps yang valid.');
+                                }
+                            },
+                        ],
              'keterangan' => 'nullable',
              'status' => 'nullable'
         ];

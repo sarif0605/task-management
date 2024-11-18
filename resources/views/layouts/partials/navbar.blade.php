@@ -13,8 +13,10 @@
                     <small>{{ auth()->user()->getRoleNames()->join(', ') }}</small>
                 </span>
                 <img class="img-profile rounded-circle"
-                     src="{{ auth()->user()->profile ? asset(auth()->user()->profile->image_url) : 'https://startbootstrap.github.io/startbootstrap-sb-admin-2/img/undraw_profile.svg' }}"
-                     alt="Profile Image">
+    src="{{ auth()->user()->profile && auth()->user()->profile->image_url
+                ? asset('storage/profile/' . auth()->user()->profile->image_url)
+                : asset('img/default-profile.png') }}"
+    alt="Profile Image">
             </a>
             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
                 <a class="dropdown-item" href="/profile">

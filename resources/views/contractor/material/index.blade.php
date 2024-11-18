@@ -25,7 +25,7 @@
         </thead>
     </table>
 
-    @push('scripts')
+    @push('js')
         @include('contractor.material.script')
     @endpush
 @endsection

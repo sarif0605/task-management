@@ -14,7 +14,7 @@ class ReportProject extends Model
     protected $keyType = "string";
     public $incrementing = false;
     public $timestamps = true;
-    protected $fillable = ['deal_project_id', 'status', 'start_date', 'end_date','bobot', 'progress', 'durasi', 'harian'
+    protected $fillable = ['deal_project_id', 'pekerjaan', 'status', 'start_date', 'end_date','bobot', 'progress', 'durasi', 'harian'
     ];
 
     public function deal_project(){

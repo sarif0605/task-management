@@ -15,8 +15,8 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->uuid('prospect_id');
             $table->foreign('prospect_id')->references('id')->on('prospects')->onDelete('cascade')->onUpdate('cascade');
-            $table->date('date');
-            $table->text('survey_results');
+            $table->date('date')->nullable();
+            $table->text('survey_results')->nullable();
             $table->timestamps();
         });
     }

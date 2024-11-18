@@ -23,25 +23,8 @@ class SurveyCreateRequest extends FormRequest
      */
     public function rules()
     {
-        $prospectDate = null;
-        if ($this->has('prospect_id')) {
-            $prospect = Prospect::find($this->input('prospect_id'));
-            $prospectDate = $prospect ? $prospect->tanggal : null;
-            Log::info("Prospect Date: " . $prospectDate);
-        }
         return [
-            'date' => [
-                'required',
-                'date',
-                function ($attribute, $value, $fail) use ($prospectDate) {
-                    if ($prospectDate && $value < $prospectDate) {
-                        $fail('The survey date cannot be before the prospect date.');
-                    }
-                },
-            ],
-            'prospect_id' => ['required', 'exists:prospects,id'],
-            'survey_results' => ['required'],
-            'image.*' => 'nullable|mimes:jpeg,png,jpg,gif|max:2048',
+            'prospect_id' => ['required', 'exists:prospects,id']
         ];
     }
 }

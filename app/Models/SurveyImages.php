@@ -15,7 +15,7 @@ class SurveyImages extends Model
     protected $keyType = "string";
     public $incrementing = false;
     public $timestamps = true;
-    protected $fillable = ['survey_id', 'image_url', 'image_public_id'];
+    protected $fillable = ['survey_id', 'image_url'];
 
     public function survey()
     {

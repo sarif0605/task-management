@@ -27,16 +27,7 @@
 </head>
 
 <body class="bg-gradient-primary" style="background: linear-gradient(to right, #4e73df, #224abe);">
-    <div class="container">
-        <div class="d-flex justify-content-center align-items-center min-vh-100 w-80">
-            <div class="card shadow-lg p-4 border-0" style="max-width: 400px; width: 100%; background: linear-gradient(135deg, #ffffff, #f8f9fc); border-radius: 15px;">
-                <div class="text-center mb-4">
-                    <h1 class="h4 text-gray-900">@yield('title')</h1>
-                </div>
-                @yield('content')
-            </div>
-        </div>
-    </div>
+    @yield('content')
 
     <!-- Core Scripts - Load jQuery first! -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>

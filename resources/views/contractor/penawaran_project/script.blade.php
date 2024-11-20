@@ -93,164 +93,24 @@
                         `;
                     }
 
-                    return ` <div class="d-flex gap-2 justify-content-start">
-                        ${buttons}
-                        </div>`;
+                    return `<div class="d-flex gap-2 justify-content-start">
+                        <a href="/penawaran_projects/show/${data.id}" class="btn btn-secondary"><i class="fa-solid fa-circle-info"></i></a>
+                                <a href="/penawaran_projects/edit/${data.id}" class="btn btn-warning"><i class="fa-solid fa-pen-to-square"></i></a>
+                            <button class="btn btn-danger btn-sm delete-btn" data-id="${data.id}">
+                                <i class="fa-solid fa-trash-arrow-up"></i>
+                            </button>
+                            </div>`;
                 },
             },
         ]
     });
 
-    $("#table-penawaran").on("click", ".show-btn", function () {
-        const id = $(this).data("id");
-        $('.loading').show();
-        $.ajax({
-            url: `/penawaran_projects/show/${id}`,
-            type: "GET",
-            success: function(response) {
-                $('.loading').hide();
-                $("#showModal input[name='pembuat_penawaran']").val(response.pembuat_penawaran);
-                if (response.file_pdf) {
-                    $("#showModal .pdf-file-name").text(response.file_pdf);
-                }
-                if (response.file_excel) {
-                    $("#showModal .excel-file-name").text(response.file_excel);
-                }
-
-                $("#showModal").modal("show");
-            },
-            error: function(xhr) {
-                $('.loading').hide();
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Failed to fetch data'
-                });
-            }
-        });
-    });
-
-    // Edit Modal Handler
-    $("#table-penawaran").on("click", ".edit-btn", function () {
-        const id = $(this).data("id");
-        $('.loading').show();
-
-        $.ajax({
-            url: `/penawaran_projects/edit/${id}`,
-            type: "GET",
-            success: function(response) {
-                $('.loading').hide();
-                $("#exampleModal input[name='pembuat_penawaran']").val(response.pembuat_penawaran);
-                $("#exampleModal #penawaran_project_id").val(id);
-                if (response.file_pdf) {
-                    $("#showModal .pdf-file-name").text(response.file_pdf);
-                }
-                if (response.file_excel) {
-                    $("#showModal .excel-file-name").text(response.file_excel);
-                }
-                $("#updateForm").attr('action', `/penawaran_projects/update/${id}`);
-                $("#exampleModal").modal("show");
-            },
-            error: function(xhr) {
-                $('.loading').hide();
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Failed to fetch data'
-                });
-            }
-        });
-    });
-
-    // Update Form Handler
-    $("#updateForm").on("submit", function (e) {
-        e.preventDefault();
-        const formData = new FormData(this);
-
-        $.ajax({
-            url: $(this).attr('action'),
-            type: 'POST',
-            data: formData,
-            processData: false,
-            contentType: false,
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            },
-            beforeSend: function() {
-                $('.loading').show();
-            },
-            success: function(response) {
-                $('.loading').hide();
-                $("#exampleModal").modal("hide");
-
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success',
-                    text: 'Data updated successfully',
-                    timer: 1500
-                });
-
-                table.ajax.reload();
-            },
-            error: function(xhr) {
-                $('.loading').hide();
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: xhr.responseJSON?.message || 'Failed to update data'
-                });
-            }
-        });
-    });
-
-    // Delete Handler
     $("#table-penawaran").on("click", ".delete-btn", function () {
-        const id = $(this).data("id");
-
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "You won't be able to revert this!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, delete it!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: `/penawaran_projects/${id}`,
-                    type: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    },
-                    success: function() {
-                        Swal.fire(
-                            'Deleted!',
-                            'Record has been deleted.',
-                            'success'
-                        );
-                        table.ajax.reload();
-                    },
-                    error: function() {
-                        Swal.fire(
-                            'Error!',
-                            'Failed to delete record.',
-                            'error'
-                        );
-                    }
-                });
-            }
-        });
-    });
-
-    // Modal cleanup
-    $('.modal').on('hidden.bs.modal', function () {
-        $(this).find('form').trigger('reset');
-        $('.loading').hide();
+        const surveyId = $(this).data("id");
+        deleteSurvey(surveyId); // Fungsi untuk menghapus survei
     });
 });
 
-// File download function
 // Fungsi download file
 function downloadFile(id, type) {
     $.ajax({
@@ -291,4 +151,113 @@ function downloadFile(id, type) {
         }
     });
 }
+    const updatePenawaranData = () => {
+        $("#loading").show();
+        const formData = new FormData($("#penawaran-form-edit")[0]);
+        $.ajax({
+            url: $("#penawaran-form-edit").attr("action"),
+            type: "POST",
+            data: formData,
+            processData: false,  // Important for FormData
+            contentType: false,  // Important for FormData
+            headers: {
+                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+            },
+            success: function (response) {
+                $("#loading").hide();
+                Swal.fire({
+                    position: "top-end",
+                    icon: "success",
+                    title: "Data berhasil diperbarui",
+                    showConfirmButton: false,
+                    timer: 1500,
+                }).then(() => {
+                    $("#table-penawaran").DataTable().ajax.reload();
+                    $("#penawaran-form-edit")[0].reset();
+                    window.location.href = "/penawaran_projects";
+                });
+            },
+            error: function (xhr) {
+                $("#loading").hide();
+                const errors = xhr.responseJSON?.errors;
+                console.error("Submission errors:", errors);
+
+                let errorMessage = '';
+                if (typeof errors === 'object' && errors !== null) {
+                    // Handle nested error objects
+                    const formatErrors = (obj, prefix = '') => {
+                        let message = '';
+                        for (let key in obj) {
+                            if (Array.isArray(obj[key])) {
+                                message += `${prefix}${key}: ${obj[key].join(', ')}\n`;
+                            } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+                                message += formatErrors(obj[key], `${prefix}${key}.`);
+                            } else {
+                                message += `${prefix}${key}: ${obj[key]}\n`;
+                            }
+                        }
+                        return message;
+                    };
+                    errorMessage = formatErrors(errors);
+                } else {
+                    errorMessage = xhr.responseJSON?.message || 'Terjadi kesalahan saat menyimpan data';
+                }
+
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: errorMessage.trim(),
+                });
+            },
+        });
+    };
+
+    function deleteSurvey(surveyId) {
+        Swal.fire({
+            title: "Apakah Anda Yakin?",
+            text: `Anda yakin menghapus data ini?`,
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Yes, delete it!",
+            cancelButtonText: "Cancel",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: `/penawaran_projects/destroy/${surveyId}`,
+                    type: "DELETE",
+                    headers: {
+                        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+                    },
+                    success: function () {
+                        Swal.fire({
+                            icon: "success",
+                            title: "Deleted!",
+                            text: `Penawaran Project dengan ID ${surveyId} telah dihapus.`,
+                            timer: 2000,
+                        });
+                        $("#table-penawaran").DataTable().ajax.reload();
+                    },
+                    error: function () {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Oops...",
+                            text: "Gagal menghapus data. Silakan coba lagi.",
+                        });
+                    },
+                });
+            }
+        });
+    }
+
+    $(document).ready(function () {
+        function handleFormSubmit(formSelector, submitFunction) {
+            $(formSelector).on("submit", function (e) {
+                e.preventDefault();
+                submitFunction();
+            });
+        }
+        handleFormSubmit("#penawaran-form-edit", updatePenawaranData);
+    });
     </script>

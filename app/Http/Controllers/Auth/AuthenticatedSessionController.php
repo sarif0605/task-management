@@ -30,7 +30,7 @@ class AuthenticatedSessionController extends Controller
             $request->authenticate();
             $request->session()->regenerate();
             Log::info('User berhasil login');
-            if (Auth::user()->hasRole('kontraktor')) {
+            if (Auth::user()->hasRole('kontraktor') || Auth::user()->hasRole('admin')) {
                 return redirect()->route('dashboard');
             }
             return redirect()->intended(RouteServiceProvider::HOME);
@@ -38,7 +38,7 @@ class AuthenticatedSessionController extends Controller
             Log::error('Login gagal', ['error' => $e->getMessage()]);
             return redirect()->back()->withErrors([
                 'email' => 'Email atau password salah.',
-            ])->withInput(); // Mengembalikan input agar pengguna tidak perlu mengetik ulang
+            ])->withInput();
         }
     }
 

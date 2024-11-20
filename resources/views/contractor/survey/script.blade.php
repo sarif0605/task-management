@@ -79,20 +79,8 @@ $(document).ready(function () {
                 render: function (data, type, row) {
                     if (userPosition === "Admin") {
                         return ` <div class="d-flex gap-2 justify-content-start">
-                        <button type="button" class="btn btn-primary btn-sm show-btn"
-                                data-id="${data.id}"
-                                data-prospect-id="${data.prospect_id}"
-                                data-bs-toggle="modal"
-                                data-bs-target="#showModal">
-                                <i class="fa-solid fa-circle-info"></i>
-                            </button>
-                            <button type="button" class="btn btn-warning btn-sm add-btn"
-                                data-id="${data.id}"
-                                data-prospect-id="${data.prospect_id}"
-                                data-bs-toggle="modal"
-                                data-bs-target="#exampleModal">
-                                <i class="fa-solid fa-plus"></i>
-                            </button>
+                        <a href="/surveys/show/${data.id}" class="btn btn-secondary"><i class="fa-solid fa-circle-info"></i></a>
+                                <a href="/surveys/edit/${data.id}" class="btn btn-warning"><i class="fa-solid fa-pen-to-square"></i></a>
                             <button class="btn btn-danger btn-sm delete-btn" data-id="${data.id}">
                                 <i class="fa-solid fa-trash-arrow-up"></i>
                             </button>
@@ -136,183 +124,69 @@ $(document).ready(function () {
         const surveyId = $(this).data("id");
         deleteSurvey(surveyId); // Fungsi untuk menghapus survei
     });
-
-    // Handle adding/updating survey
-    $("#table-survey").on("click", ".add-btn", function () {
-        const surveyId = $(this).data("id");
-        const prospectId = $(this).data("prospect-id");
-        $("#updateForm").trigger("reset");
-        $('.loading').show();
-        $.ajax({
-            url: `/surveys/edit/${surveyId}`,
-            type: "GET",
-            success: function(response) {
-                $('.loading').hide();
-                $("#survey_id").val(surveyId);
-                $("#prospect_id").val(prospectId);
-                $("input[name='date']").val(response.survey.date ?? "");
-                $("textarea[name='survey_results']").val(response.survey.survey_results ?? "");
-                let imageContainer = $("#existing-images");
-                imageContainer.empty();
-                if (response.survey.survey_images && response.survey.survey_images.length > 0) {
-                    response.survey.survey_images.forEach(function(image) {
-                        imageContainer.append(`
-                            <div class="mb-2 position-relative">
-                                <img src="/storage/${image.image_url}" class="img-thumbnail" width="150">
-                                <button type="button" class="btn btn-danger btn-sm delete-image"
-                                    data-image-id="${image.id}"
-                                    style="position: absolute; top: 0; right: 0;">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                        `);
-                    });
-                }
-                const updateUrl = `/surveys/update/${surveyId}`;
-                $("#updateForm").attr('action', updateUrl);
-                $("#exampleModal").modal("show");
-            },
-            error: function(xhr) {
-                $('.loading').hide();
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Failed to fetch survey data'
-                });
-            }
-        });
-    });
-
-    // Handle show survey details
-    $("#table-survey").on("click", ".show-btn", function () {
-        const surveyId = $(this).data("id");
-        const prospectId = $(this).data("prospect-id");
-        $("#showForm").trigger("reset");  // Reset form before showing modal
-        $('.loading').show();  // Show loading spinner
-
-        $.ajax({
-            url: `/surveys/show/${surveyId}`,
-            type: "GET",
-            success: function(response) {
-                $('.loading').hide();
-                $("#survey_id").val(surveyId);
-                $("#prospect_id").val(prospectId);
-                $("input[name='date']").val(response.survey.date || 'N/A');
-                $("textarea[name='survey_results']").val(response.survey.survey_results || 'No survey results');
-                let imageContainer = $("#existing-images");
-                imageContainer.empty();
-                if (response.survey.survey_images && response.survey.survey_images.length > 0) {
-                    response.survey.survey_images.forEach(function(image) {
-                        imageContainer.append(`
-                            <div class="mb-2 position-relative">
-                                <img src="/storage/${image.image_url}" class="img-thumbnail" width="150">
-                                <button type="button" class="btn btn-danger btn-sm delete-image"
-                                    data-image-id="${image.id}"
-                                    style="position: absolute; top: 0; right: 0;">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                        `);
-                    });
-                } else {
-                    imageContainer.append('<p>No images available</p>');
-                }
-                $("#showModal").modal("show");
-            },
-            error: function(xhr) {
-                $('.loading').hide();  // Hide loading spinner
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Failed to fetch survey data'
-                });
-            }
-        });
-    });
-
-    // Handle delete image button
-    $(document).on('click', '.delete-image', function(e) {
-        e.preventDefault();
-        const imageId = $(this).data('image-id');
-        const imageElement = $(this).parent();
-
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "You won't be able to revert this!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Yes, delete it!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Add image ID to deleted images array
-                const deletedImagesInput = $("#deleted_images");
-                let deletedImages = deletedImagesInput.val() ?
-                    JSON.parse(deletedImagesInput.val()) : [];
-                deletedImages.push(imageId);
-                deletedImagesInput.val(JSON.stringify(deletedImages));
-
-                // Remove image from display
-                imageElement.remove();
-            }
-        });
-    });
-
-    // Handle form submission
-    $("#updateForm").on("submit", function (e) {
-        e.preventDefault();
-
-        const formData = new FormData(this);
-        formData.append('_method', 'PUT');
-
-        $.ajax({
-            url: $(this).attr('action'),
-            type: 'POST',
-            data: formData,
-            processData: false,
-            contentType: false,
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            },
-            beforeSend: function() {
-                $('.loading').show();
-            },
-            success: function(response) {
-                $('.loading').hide();
-                $("#exampleModal").modal("hide");
-
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success',
-                    text: 'Survey updated successfully',
-                    timer: 1500
-                });
-
-                $("#table-survey").DataTable().ajax.reload();
-            },
-            error: function(xhr) {
-                $('.loading').hide();
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: xhr.responseJSON?.message || 'Failed to update survey'
-                });
-            }
-        });
-    });
-
-    // Clean up modal when hidden
-    $('#exampleModal').on('hidden.bs.modal', function () {
-        $("#updateForm").trigger("reset");
-        $('.loading').hide();
-    });
 });
+
+    const updateSurveyData = () => {
+        $("#loading").show();
+        const formData = new FormData($("#survey-form-edit")[0]);
+        $.ajax({
+            url: $("#survey-form-edit").attr("action"),
+            type: "POST",
+            data: formData,
+            processData: false,  // Important for FormData
+            contentType: false,  // Important for FormData
+            headers: {
+                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+            },
+            success: function (response) {
+                $("#loading").hide();
+                Swal.fire({
+                    position: "top-end",
+                    icon: "success",
+                    title: "Data berhasil diperbarui",
+                    showConfirmButton: false,
+                    timer: 1500,
+                }).then(() => {
+                    $("#table-survey").DataTable().ajax.reload();
+                    $("#survey-form-edit")[0].reset();
+                    window.location.href = "/surveys";
+                });
+            },
+            error: function (xhr) {
+                $("#loading").hide();
+                const errors = xhr.responseJSON?.errors;
+                let errorMessage = '';
+                if (typeof errors === 'object' && errors !== null) {
+                    const formatErrors = (obj, prefix = '') => {
+                        let message = '';
+                        for (let key in obj) {
+                            if (Array.isArray(obj[key])) {
+                                message += `${prefix}${key}: ${obj[key].join(', ')}\n`;
+                            } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+                                message += formatErrors(obj[key], `${prefix}${key}.`);
+                            } else {
+                                message += `${prefix}${key}: ${obj[key]}\n`;
+                            }
+                        }
+                        return message;
+                    };
+                    errorMessage = formatErrors(errors);
+                } else {
+                    errorMessage = xhr.responseJSON?.message || 'Terjadi kesalahan saat menyimpan data';
+                }
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: errorMessage.trim(),
+                });
+            },
+        });
+    };
 
     function deleteSurvey(surveyId) {
         Swal.fire({
             title: "Apakah Anda Yakin?",
-            text: `Anda yakin menghapus data ini?`,
+            text: `Anda yakin menghapus data dengan ID ${surveyId}?`,
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#d33",
@@ -347,4 +221,15 @@ $(document).ready(function () {
             }
         });
     }
+
+    $(document).ready(function () {
+        function handleFormSubmit(formSelector, submitFunction) {
+            $(formSelector).on("submit", function (e) {
+                e.preventDefault();
+                submitFunction();
+            });
+        }
+        handleFormSubmit("#survey-form", createData);
+        handleFormSubmit("#survey-form-edit", updateSurveyData);
+    });
     </script>

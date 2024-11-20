@@ -23,7 +23,7 @@
                         <th>Tanggal</th>
                         <th>Pemilik</th>
                         <th>Lokasi</th>
-                        <th>No Telp</th>
+                        <th>Telp</th>
                         <th>Keterangan</th>
                         <th>Status</th>
                         <th>Survey</th>

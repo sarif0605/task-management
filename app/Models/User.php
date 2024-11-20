@@ -4,7 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
-use Carbon\Carbon;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -12,7 +12,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens, HasFactory, Notifiable, HasRoles, HasUlids;
 
@@ -38,28 +38,6 @@ class User extends Authenticatable
         'remember_token',
     ];
 
-    public static function boot(){
-        parent::boot();
-        static::created(function($model){
-            $model->generateOtpCode();
-        });
-    }
-
-    public function generateOtpCode()
-    {
-        do {
-            $randomNumber = mt_rand(100000, 999999);
-            $checkOtpCode = OtpCodes::where('otp', $randomNumber)->exists();
-        } while ($checkOtpCode);
-
-        $now = Carbon::now();
-        $otpCode = OtpCodes::create([
-            'user_id' => $this->id,
-            'otp' => $randomNumber,
-            'valid_until' => $now->addMinutes(5),
-        ]);
-    }
-
     /**
      * The attributes that should be cast.
      *
@@ -75,11 +53,6 @@ class User extends Authenticatable
 
     public function deal_project_users(){
         return $this->hasMany(DealProjectUsers::class, 'user_id');
-    }
-
-    public function otpCode()
-    {
-        return $this->hasOne(OtpCodes::class, 'user_id');
     }
 
     public function divisionsPositions()

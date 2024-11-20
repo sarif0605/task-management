@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Constructor\AttendanceController;
 use App\Http\Controllers\Constructor\ConstraintController;
 use App\Http\Controllers\Constructor\DashboardConstructorController;
@@ -14,6 +13,7 @@ use App\Http\Controllers\Constructor\ReportProjectController;
 use App\Http\Controllers\Constructor\SurveyController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -34,11 +34,9 @@ Route::get('/', function () {
 Route::get('/register', function () {
     return view('auth.register');
 });
-
-Route::get('/verifikasi-view', [AuthController::class, 'verifikasiView'])->name('verifikasi-view');
-Route::post('/verifikasi-otp', [AuthController::class, 'verifikasi'])->name('verifikasi');
-Route::post('/generate', [AuthController::class, 'generateOtpCode'])->name('generate');
-
+Route::get('/email/verify', function () {
+    return view('auth.verify-email');
+})->middleware('auth')->name('verify-email');
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardConstructorController::class, 'index'])
     ->name('dashboard');

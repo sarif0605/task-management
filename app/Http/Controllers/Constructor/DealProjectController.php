@@ -79,28 +79,28 @@ class DealProjectController extends Controller
      */
 
      public function show($id) {
-        $deal = DealProject::with('prospect')->find($id);
-        if (!$deal) {
-            return response()->json(['error' => 'Survey not found'], 404);
+        $dealProject = DealProject::with('prospect')->find($id);
+        if (!$dealProject) {
+            return redirect()->route('deal_projects');
         }
-        return response()->json([
-            'deal' => $deal
-        ]);
+        return view('contractor.done_deal.show', compact('dealProject'));
     }
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit($id)
+    public function edit(string $id)
     {
         $deal = DealProject::find($id);
+        $users = User::with(['profile', 'position'])
+            ->whereDoesntHave('position', function($query) {
+                $query->where('name', 'Admin'); // Hindari user dengan posisi "Admin"
+            })
+            ->get();
         if (!$deal) {
-            return response()->json([
-                'error' => 'Survey not found'
-            ], 404);
+            return redirect()->route('deal_projects.edit')
+                ->with('error', 'Deal Projects dengan ID ' . $id . ' tidak ditemukan.');
         }
-        return response()->json([
-            'deal' => $deal
-        ]);
+        return view('contractor.done_deal.edit', compact('deal', 'users'));
     }
 
     /**
@@ -116,11 +116,9 @@ class DealProjectController extends Controller
 
             // Handle RAB file
             if ($request->hasFile('rab')) {
-                // Delete old file if exists
-                if ($deal->rab) {
-                    Storage::delete('public/rab/' . $deal->rab);
+                if (!empty($deal->rab)) {
+                    Storage::disk('local')->delete('public/rab/' . $deal->rab);
                 }
-
                 $rabFile = $request->file('rab');
                 $rabName = uniqid() . '_' . $rabFile->getClientOriginalName();
                 $rabFile->storeAs('public/rab', $rabName);
@@ -129,11 +127,9 @@ class DealProjectController extends Controller
 
             // Handle RAP file
             if ($request->hasFile('rap')) {
-                // Delete old file if exists
-                if ($deal->rap) {
-                    Storage::delete('public/rap/' . $deal->rap);
+                if (!empty($deal->rap)) {
+                    Storage::disk('local')->delete('public/rap/' . $deal->rap);
                 }
-
                 $rapFile = $request->file('rap');
                 $rapName = uniqid() . '_' . $rapFile->getClientOriginalName();
                 $rapFile->storeAs('public/rap', $rapName);
@@ -174,69 +170,19 @@ class DealProjectController extends Controller
             ], 500);
         }
     }
-    // public function update(DealProjectUpdateRequest $request, string $id)
-    // {
-    //     $deal = DealProject::find($id);
-    //     if (!$deal) {
-    //         return redirect()->route('deal_project.edit', $id)
-    //             ->with('error', 'Deal Project dengan ID ' . $id . ' tidak ditemukan.');
-    //     }
-    //     DB::beginTransaction();
-    //     try {
-    //         $data = $request->validated();
-    //         if ($request->hasFile('rab')) {
-    //             if ($deal->rab) {
-    //                 $oldPdfPath = "public/rab/{$deal->rab}"; // Adjusted path
-    //                 if (Storage::exists($oldPdfPath)) {
-    //                     Storage::delete($oldPdfPath);
-    //                 }
-    //             }
-    //             $pdfFile = $request->file('rab');
-    //             $pdfName = uniqid() . '_' . $pdfFile->getClientOriginalName();
-    //             $pdfFile->storeAs('public/rab', $pdfName);
-    //             $data['rab'] = $pdfName;
-    //         }
 
-    //         // Handle Excel file update
-    //         if ($request->hasFile('rap')) {
-    //             if ($deal->rap) {
-    //                 $oldExcelPath = "public/rap/{$deal->rap}"; // Adjusted path
-    //                 if (Storage::exists($oldExcelPath)) {
-    //                     Storage::delete($oldExcelPath);
-    //                 }
-    //             }
-
-    //             $excelFile = $request->file('rap');
-    //             $excelName = uniqid() . '_' . $excelFile->getClientOriginalName();
-    //             $excelFile->storeAs('public/rap', $excelName);
-    //             $data['rap'] = $excelName;
-    //         }
-    //         $deal->update($data);
-    //         DB::commit();
-    //         return redirect()->route('deal_projects')
-    //             ->with('success', 'Penawaran Project berhasil diperbarui.');
-    //     } catch (\Exception $e) {
-    //         DB::rollBack();
-    //         Log::error('Penawaran Project Update Failed:', [
-    //             'message' => $e->getMessage(),
-    //             'file' => $e->getFile(),
-    //             'line' => $e->getLine(),
-    //             'trace' => $e->getTraceAsString()
-    //         ]);
-    //         return redirect()->route('deal_projects.edit', $id)
-    //             ->with('error', 'Gagal memperbarui Penawaran Project: ' . $e->getMessage());
-    //     }
-    // }
-
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
         $dealProject = DealProject::find($id);
         if (!$dealProject) {
             return redirect()->route('done_deals')
             ->with('error', 'Survey dengan ID ' . $id . ' tidak ditemukan.');
+        }
+        if (!empty($dealProject->rab)) {
+            Storage::disk('local')->delete('public/rab/' . $dealProject->rab);
+        }
+        if (!empty($dealProject->rap)) {
+            Storage::disk('local')->delete('public/rap/' . $dealProject->rap);
         }
         $dealProject->delete();
         return redirect()->route('done_deals')->with('success', 'Deal Project deleted successfully.');

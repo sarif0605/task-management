@@ -18,7 +18,7 @@ class SurveyController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['isVerificationAccount', 'isStatusAccount'])->only('store', 'create', 'edit', 'update', 'destroy');
+        $this->middleware(['verified', 'isStatusAccount'])->only('store', 'create', 'edit', 'update', 'destroy');
     }
 
     /**
@@ -53,30 +53,28 @@ class SurveyController extends Controller
      * Display the specified resource.
      */
 
-     public function show($id) {
-        $survey = Survey::with('prospect', 'survey_images')->find($id);
+    public function show(string $id)
+    {
+        $survey = Survey::with('prospect')->find($id);
         if (!$survey) {
-            return response()->json(['error' => 'Survey not found'], 404);
+            return redirect()->route('surveys')
+            ->with('error', 'Survey dengan ID ' . $id . ' tidak ditemukan.');
         }
-        return response()->json([
-            'survey' => $survey
-        ]);
+        return view('contractor.survey.show', compact('survey'));
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit($id)
+    public function edit(string $id)
     {
-        $survey = Survey::with('survey_images')->find($id);
+        $survey = Survey::find($id);
+        $prospect = Prospect::all();
         if (!$survey) {
-            return response()->json([
-                'error' => 'Survey not found'
-            ], 404);
+            return redirect()->route('surveys.edit')
+            ->with('error', 'Survey dengan ID ' . $id . ' tidak ditemukan.');
         }
-        return response()->json([
-            'survey' => $survey
-        ]);
+        return view('contractor.survey.edit', compact('survey', 'prospect'));
     }
 
 public function update(SurveyUpdateRequest $request, string $id)
@@ -92,6 +90,7 @@ public function update(SurveyUpdateRequest $request, string $id)
         DB::beginTransaction();
         $data = $request->validated();
         $survey->update($data);
+
         if ($survey->prospect_id) {
             $prospect = Prospect::find($survey->prospect_id);
             if ($prospect) {
@@ -99,19 +98,13 @@ public function update(SurveyUpdateRequest $request, string $id)
                 $prospect->save();
             }
         }
-        if ($request->has('deleted_images')) {
-            $deletedImages = json_decode($request->deleted_images);
-            foreach ($deletedImages as $imageId) {
-                $image = SurveyImages::find($imageId);
-                if ($image) {
-                    Storage::disk('local')->delete($image->image_url);
-                    $image->delete();
-                }
-            }
-        }
-
         // Handle new images
         if ($request->hasFile('image')) {
+            $existingImages = SurveyImages::where('survey_id', $survey->id)->get();
+            foreach ($existingImages as $existingImage) {
+                Storage::disk('local')->delete('public/survey/' . $existingImage->image_url);
+                $existingImage->delete();
+            }
             foreach ($request->file('image') as $image) {
                 $imageContent = file_get_contents($image->getRealPath());
                 $imageName = uniqid() . '_' . $image->getClientOriginalName();
@@ -122,16 +115,11 @@ public function update(SurveyUpdateRequest $request, string $id)
                 ]);
             }
         }
-
         DB::commit();
-        return response()->json([
-            'message' => 'Survey updated successfully.'
-        ], 200);
+        return redirect()->route('surveys');
     } catch (\Exception $e) {
         DB::rollBack();
-        return response()->json([
-            'error' => 'Failed to update survey: ' . $e->getMessage()
-        ], 500);
+        return redirect()->route('surveys');
     }
 }
 
@@ -147,9 +135,8 @@ public function update(SurveyUpdateRequest $request, string $id)
         try {
             DB::beginTransaction();
             foreach ($survey->images as $image) {
-                $imagePath = str_replace('/storage', 'public', $image->image_url);
-                if (Storage::exists($imagePath)) {
-                    Storage::delete($imagePath);
+                if (!empty($image)) {
+                    Storage::disk('local')->delete('public/survey/' . $image);
                 }
                 $image->delete();
             }

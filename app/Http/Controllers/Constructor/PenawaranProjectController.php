@@ -57,75 +57,15 @@ class PenawaranProjectController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit($id)
+    public function edit(string $id)
     {
         $penawaran = PenawaranProject::find($id);
         if (!$penawaran) {
-            return response()->json([
-                'error' => 'Survey not found'
-            ], 404);
+            return redirect()->route('penawaran_projects.edit')
+            ->with('error', 'Penawaran Projects dengan ID ' . $id . ' tidak ditemukan.');
         }
-        return response()->json([
-            'penawaran' => $penawaran
-        ]);
+        return view('contractor.penawaran_project.edit', compact('penawaran'));
     }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    // public function update(PenawaranProjectUpdateRequest $request, string $id)
-    // {
-    //     $penawaranProject = PenawaranProject::find($id);
-    //     if (!$penawaranProject) {
-    //         return redirect()->route('penawaran_projects.edit', $id)
-    //             ->with('error', 'Penawaran Project dengan ID ' . $id . ' tidak ditemukan.');
-    //     }
-
-    //     DB::beginTransaction();
-    //     try {
-    //         $data = $request->validated();
-    //         if ($request->hasFile('file_pdf')) {
-    //             if ($penawaranProject->file_pdf) {
-    //                 $oldPdfPath = str_replace('/storage', 'public/pdf', $penawaranProject->file_pdf);
-    //                 if (Storage::exists($oldPdfPath)) {
-    //                     Storage::delete($oldPdfPath);
-    //                 }
-    //             }
-    //             $pdfFile = $request->file('file_pdf');
-    //             $pdfContent = file_get_contents($pdfFile->getRealPath());
-    //             $pdfName = uniqid() . '_' . $pdfFile->getClientOriginalName();
-    //             Storage::disk('local')->put("public/pdf/{$pdfName}", $pdfContent);
-    //             $data['file_pdf'] = $pdfName;
-    //         }
-    //         if ($request->hasFile('file_excel')) {
-    //             if ($penawaranProject->file_excel) {
-    //                 $oldExcelPath = str_replace('/storage', 'public/excel', $penawaranProject->file_excel);
-    //                 if (Storage::exists($oldExcelPath)) {
-    //                     Storage::delete($oldExcelPath);
-    //                 }
-    //             }
-    //             $excelFile = $request->file('file_excel');
-    //             $excelContent = file_get_contents($excelFile->getRealPath());
-    //             $excelName = uniqid() . '_' . $excelFile->getClientOriginalName();
-    //             Storage::disk('local')->put("public/excel/{$excelName}", $excelContent);
-    //             $data['file_excel'] = $excelName;
-    //         }
-    //         $penawaranProject->update($data);
-    //         DB::commit();
-    //         return redirect()->route('penawaran_projects')
-    //             ->with('success', 'Penawaran Project berhasil diperbarui.');
-    //     } catch (\Exception $e) {
-    //         DB::rollBack();
-    //         Log::error('Penawaran Project Update Failed:', [
-    //             'message' => $e->getMessage(),
-    //             'file' => $e->getFile(),
-    //             'line' => $e->getLine(),
-    //             'trace' => $e->getTraceAsString()
-    //         ]);
-    //         return redirect()->route('penawaran_projects.edit', $id)
-    //             ->with('error', 'Gagal memperbarui Penawaran Project: ' . $e->getMessage());
-    //     }
-    // }
 
     public function update(PenawaranProjectUpdateRequest $request, string $id)
     {
@@ -134,54 +74,35 @@ class PenawaranProjectController extends Controller
             return redirect()->route('penawaran_projects.edit', $id)
                 ->with('error', 'Penawaran Project dengan ID ' . $id . ' tidak ditemukan.');
         }
-
         DB::beginTransaction();
         try {
             $data = $request->validated();
-
-            // Handle PDF file update
             if ($request->hasFile('file_pdf')) {
-                if ($penawaranProject->file_pdf) {
-                    $oldPdfPath = "public/pdf/{$penawaranProject->file_pdf}"; // Adjusted path
-                    if (Storage::exists($oldPdfPath)) {
-                        Storage::delete($oldPdfPath);
-                    }
+                if (!empty($penawaranProject->file_pdf)) {
+                    Storage::disk('local')->delete('public/pdf/' . $penawaranProject->file_pdf);
                 }
-
                 $pdfFile = $request->file('file_pdf');
+                $pdfContent = file_get_contents($pdfFile->getRealPath());
                 $pdfName = uniqid() . '_' . $pdfFile->getClientOriginalName();
-                $pdfFile->storeAs('public/pdf', $pdfName);
+                Storage::disk('local')->put("public/pdf/{$pdfName}", $pdfContent);
                 $data['file_pdf'] = $pdfName;
             }
-
-            // Handle Excel file update
             if ($request->hasFile('file_excel')) {
-                if ($penawaranProject->file_excel) {
-                    $oldExcelPath = "public/excel/{$penawaranProject->file_excel}"; // Adjusted path
-                    if (Storage::exists($oldExcelPath)) {
-                        Storage::delete($oldExcelPath);
-                    }
+                if (!empty($penawaranProject->file_excel)) {
+                    Storage::disk('local')->delete('public/excel/' . $penawaranProject->file_excel);
                 }
-
                 $excelFile = $request->file('file_excel');
+                $excelContent = file_get_contents($excelFile->getRealPath());
                 $excelName = uniqid() . '_' . $excelFile->getClientOriginalName();
-                $excelFile->storeAs('public/excel', $excelName);
+                Storage::disk('local')->put("public/excel/{$excelName}", $excelContent);
                 $data['file_excel'] = $excelName;
             }
-
             $penawaranProject->update($data);
-
             DB::commit();
             return redirect()->route('penawaran_projects')
                 ->with('success', 'Penawaran Project berhasil diperbarui.');
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Penawaran Project Update Failed:', [
-                'message' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString()
-            ]);
             return redirect()->route('penawaran_projects.edit', $id)
                 ->with('error', 'Gagal memperbarui Penawaran Project: ' . $e->getMessage());
         }
@@ -210,28 +131,11 @@ class PenawaranProjectController extends Controller
         DB::beginTransaction();
         try {
             $penawaran = PenawaranProject::findOrFail($id);
-            if ($penawaran->pdf_public_id) {
-                Cloudinary::destroy($penawaran->pdf_public_id);
+            if (!empty($penawaran->file_excel)) {
+                Storage::disk('local')->delete('public/excel/' . $penawaran->file_excel);
             }
-            if ($penawaran->excel_public_id) {
-                Cloudinary::destroy($penawaran->excel_public_id);
-            }
-            if ($penawaran->file_pdf) {
-                $pdfPath = str_replace('/storage', 'public', $penawaran->file_pdf);
-                if (Storage::exists($pdfPath)) {
-                    Storage::delete($pdfPath);
-                }
-            }
-            if ($penawaran->file_excel) {
-                $excelPath = str_replace('/storage', 'public', $penawaran->file_excel);
-                if (Storage::exists($excelPath)) {
-                    Storage::delete($excelPath);
-                }
-            }
-            $prospect = $penawaran->prospect;
-            if ($prospect && $prospect->status === 'penawaran') {
-                $prospect->status = 'new';
-                $prospect->save();
+            if (!empty($penawaran->file_pdf)) {
+                Storage::disk('local')->delete('public/pdf/' . $penawaran->file_pdf);
             }
             $penawaran->delete();
             DB::commit();

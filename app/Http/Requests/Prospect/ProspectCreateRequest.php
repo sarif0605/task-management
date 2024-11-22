@@ -22,18 +22,20 @@ class ProspectCreateRequest extends FormRequest
     public function rules(): array
     {
         return [
-             'nama_produk' => 'required',
-             'tanggal' => 'required|date',
-             'no_telp' => ['required', 'numeric', 'regex:/^62[0-9]+$/'],
-             'pemilik' => 'required',
-             'lokasi' => [ 'required','url',
-                        function ($attribute, $value, $fail) {
-                            if (!str_contains($value, 'google.com/maps')) {
-                                $fail('Lokasi harus berupa URL Google Maps yang valid.');
-                            }
-                        },
-                    ],
-             'keterangan' => 'required'
+            'nama_produk' => 'required',
+            'tanggal' => 'required|date',
+            'no_telp' => ['required', 'numeric', 'regex:/^62[0-9]+$/'],
+            'pemilik' => 'required',
+            'lokasi' => [
+                'nullable',
+                'url',
+                function ($attribute, $value, $fail) {
+                    if ($value !== null && !str_contains($value, 'google.com/maps')) {
+                        $fail('Lokasi harus berupa URL Google Maps yang valid.');
+                    }
+                },
+            ],
+            'keterangan' => 'required'
         ];
     }
 }

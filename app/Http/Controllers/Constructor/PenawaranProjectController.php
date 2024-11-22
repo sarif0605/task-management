@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Constructor;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PenawaranProject\PenawaranProjectCreateRequest;
 use App\Http\Requests\PenawaranProject\PenawaranProjectUpdateRequest;
+use App\Models\FilePenawaranProjects;
 use App\Models\PenawaranProject;
 use App\Models\Prospect;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
@@ -17,7 +18,7 @@ class PenawaranProjectController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['isVerificationAccount', 'isStatusAccount'])->only('store', 'create', 'edit', 'update', 'destroy');
+        $this->middleware(['verified', 'isStatusAccount'])->only('store', 'create', 'edit', 'update', 'destroy');
     }
 
     /**
@@ -26,7 +27,7 @@ class PenawaranProjectController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $penawaran_project = PenawaranProject::with('prospect')->orderBy('created_at', 'DESC')->get();
+            $penawaran_project = PenawaranProject::with('prospect', 'file_penawaran_project')->orderBy('created_at', 'DESC')->get();
             return response()->json(['data' => $penawaran_project]);
         }
         return view('contractor.penawaran_project.index');
@@ -69,42 +70,46 @@ class PenawaranProjectController extends Controller
 
     public function update(PenawaranProjectUpdateRequest $request, string $id)
     {
-        $penawaranProject = PenawaranProject::find($id);
-        if (!$penawaranProject) {
-            return redirect()->route('penawaran_projects.edit', $id)
-                ->with('error', 'Penawaran Project dengan ID ' . $id . ' tidak ditemukan.');
+        $penawaran = PenawaranProject::find($id);
+        if (!$penawaran) {
+            return response()->json([
+                'error' => 'Survey tidak ditemukan.'
+            ], 404);
         }
-        DB::beginTransaction();
         try {
+            DB::beginTransaction();
             $data = $request->validated();
-            if ($request->hasFile('file_pdf')) {
-                if (!empty($penawaranProject->file_pdf)) {
-                    Storage::disk('local')->delete('public/pdf/' . $penawaranProject->file_pdf);
+            $penawaran->update($data);
+
+            if ($penawaran->prospect_id) {
+                $prospect = Prospect::find($penawaran->prospect_id);
+                if ($prospect) {
+                    $prospect->status = 'penawaran';
+                    $prospect->save();
                 }
-                $pdfFile = $request->file('file_pdf');
-                $pdfContent = file_get_contents($pdfFile->getRealPath());
-                $pdfName = uniqid() . '_' . $pdfFile->getClientOriginalName();
-                Storage::disk('local')->put("public/pdf/{$pdfName}", $pdfContent);
-                $data['file_pdf'] = $pdfName;
             }
-            if ($request->hasFile('file_excel')) {
-                if (!empty($penawaranProject->file_excel)) {
-                    Storage::disk('local')->delete('public/excel/' . $penawaranProject->file_excel);
+            // Handle new images
+            if ($request->hasFile('file')) {
+                $existingImages = FilePenawaranProjects::where('penawaran_project_id', $penawaran->id)->get();
+                foreach ($existingImages as $existingImage) {
+                    Storage::disk('local')->delete('public/penawaran/' . $existingImage->file);
+                    $existingImage->delete();
                 }
-                $excelFile = $request->file('file_excel');
-                $excelContent = file_get_contents($excelFile->getRealPath());
-                $excelName = uniqid() . '_' . $excelFile->getClientOriginalName();
-                Storage::disk('local')->put("public/excel/{$excelName}", $excelContent);
-                $data['file_excel'] = $excelName;
+                foreach ($request->file('file') as $image) {
+                    $imageContent = file_get_contents($image->getRealPath());
+                    $imageName = uniqid() . '_' . $image->getClientOriginalName();
+                    Storage::disk('local')->put("public/penawaran/{$imageName}", $imageContent);
+                    FilePenawaranProjects::create([
+                        'penawaran_project_id' => $penawaran->id,
+                        'file' => $imageName,
+                    ]);
+                }
             }
-            $penawaranProject->update($data);
             DB::commit();
-            return redirect()->route('penawaran_projects')
-                ->with('success', 'Penawaran Project berhasil diperbarui.');
+            return redirect()->route('penawaran_projects')->with('status', 'berhasil mengubah data survey');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->route('penawaran_projects.edit', $id)
-                ->with('error', 'Gagal memperbarui Penawaran Project: ' . $e->getMessage());
+            return redirect()->route('penawaran_projects')->with('error', 'gagal memperbarui data survey');
         }
     }
 

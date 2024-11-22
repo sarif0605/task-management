@@ -13,7 +13,7 @@ class OpnamMaterialConstraintController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['isVerificationAccount', 'isStatusAccount'])->only('createProject', 'storeProjectData');
+        $this->middleware(['verified', 'isStatusAccount'])->only('createProject', 'storeProjectData');
     }
 
     public function createProject($deal_project_id)
@@ -30,11 +30,11 @@ class OpnamMaterialConstraintController extends Controller
             'pekerjaan' => $validatedData['opnams_pekerjaan'],
         ]);
 
-        KasbonOpnams::create([
-            'opnam_id' => $opnam->id,
-            'nominal' => $validatedData['kasbon_nominal'],
-            'keterangan' => $validatedData['kasbon_keterangan'],
-        ]);
+        // KasbonOpnams::create([
+        //     'opnam_id' => $opnam->id,
+        //     'nominal' => $validatedData['kasbon_nominal'],
+        //     'keterangan' => $validatedData['kasbon_keterangan'],
+        // ]);
 
         Materials::create([
             'deal_project_id' => $validatedData['deal_project_id'],

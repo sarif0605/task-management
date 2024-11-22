@@ -103,6 +103,22 @@
 </div>
 
 @push('js')
-    @include('contractor.done_deal.script')
-@endpush
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.getElementById("deal-form-update");
+            const loadingOverlay = document.getElementById("loading");
+            const submitButton = form.querySelector("button[type='submit']");
+
+            if (form && loadingOverlay && submitButton) {
+                form.addEventListener("submit", function () {
+                    loadingOverlay.style.display = "flex"; // Tampilkan loading overlay
+                    submitButton.disabled = true; // Nonaktifkan tombol submit
+                    submitButton.textContent = "Loading..."; // Ubah teks tombol
+                });
+            } else {
+                console.error("Form, loading overlay, atau tombol submit tidak ditemukan!");
+            }
+        });
+    </script>
+    @endpush
 @endsection

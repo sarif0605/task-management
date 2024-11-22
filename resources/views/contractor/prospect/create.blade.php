@@ -1,7 +1,6 @@
 @extends('layouts.contractor')
 @section('title', 'Create Prospect')
 @section('content')
-    <hr />
     @include('components.loading')
     <form id="prospect-form" class="p-10" action="{{ route('prospects.store') }}" method="POST">
         @csrf
@@ -66,7 +65,23 @@
         </div>
 
     </form>
-    @push('js')
-        @include('contractor.prospect.script')
-    @endpush
+    @push('scripts')
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("prospect-form");
+    const loadingOverlay = document.getElementById("loading");
+    const submitButton = form.querySelector("button[type='submit']");
+
+    if (form && loadingOverlay && submitButton) {
+        form.addEventListener("submit", function (e) {
+            loadingOverlay.style.display = "flex"; // Tampilkan overlay
+            submitButton.disabled = true; // Nonaktifkan tombol
+            submitButton.textContent = "Loading..."; // Ubah teks tombol
+        });
+    } else {
+        console.error("Form, loading overlay, atau tombol submit tidak ditemukan!");
+    }
+});
+</script>
+@endpush
 @endsection

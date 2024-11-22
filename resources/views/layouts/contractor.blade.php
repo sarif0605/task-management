@@ -69,9 +69,6 @@
         <script src="{{asset('admin/vendor/bootstrap/js/bootstrap.bundle.min.js')}}"></script>
         <script src="{{ asset('admin/vendor/jquery-easing/jquery.easing.min.js') }}"></script>
         <script src="{{asset('admin/js/sb-admin-2.min.js')}}"></script>
-        {{-- <script src="{{asset('admin/vendor/chart.js/Chart.min.js')}}"></script>
-        <script src="{{asset('admin/js/demo/chart-area-demo.js')}}"></script>
-        <script src="{{asset('admin/js/demo/chart-pie-demo.js')}}"></script> --}}
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">

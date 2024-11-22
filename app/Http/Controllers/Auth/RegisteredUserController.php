@@ -59,7 +59,7 @@ class RegisteredUserController extends Controller
          }
          event(new Registered($user));
          Auth::login($user);
-         return redirect()->route('verify-email');
+         return redirect('/verify-email')->with('status','Berhasil Melakukan Registrasi dan Cek Email Anda!');
      }
 
 }

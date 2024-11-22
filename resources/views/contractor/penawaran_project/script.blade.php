@@ -50,22 +50,18 @@
                 }
             },
             {
-                data: "file_pdf",
-                orderable: false,
+                data: "file_penawaran_project",
                 render: function (data, type, row) {
-                    return data
-                        ? `<button onclick="downloadFile('${row.id}', 'pdf')" class="btn btn-primary btn-sm">Download</button>`
-                        : "No PDF";
-                },
-            },
-            {
-                data: "file_excel",
-                orderable: false,
-                render: function (data, type, row) {
-                    return data
-                        ? `<button onclick="downloadFile('${row.id}', 'excel')" class="btn btn-primary btn-sm">Download</button>`
-                        : "No Excel";
-                },
+                    if (data && Array.isArray(data) && data.length > 0) {
+                        const imageName = data[0].file; // Ambil file pertama
+                        const imageUrl = `/storage/penawaran/${imageName}`;
+                        return `
+                            <button onclick="downloadFile('${row.id}', 'pdf')" class="btn btn-primary btn-sm">
+                                Download
+                            </button>`;
+                    }
+                    return 'No File';
+                }
             },
             {
                 data: null,
@@ -151,66 +147,6 @@ function downloadFile(id, type) {
         }
     });
 }
-    const updatePenawaranData = () => {
-        $("#loading").show();
-        const formData = new FormData($("#penawaran-form-edit")[0]);
-        $.ajax({
-            url: $("#penawaran-form-edit").attr("action"),
-            type: "POST",
-            data: formData,
-            processData: false,  // Important for FormData
-            contentType: false,  // Important for FormData
-            headers: {
-                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
-            },
-            success: function (response) {
-                $("#loading").hide();
-                Swal.fire({
-                    position: "top-end",
-                    icon: "success",
-                    title: "Data berhasil diperbarui",
-                    showConfirmButton: false,
-                    timer: 1500,
-                }).then(() => {
-                    $("#table-penawaran").DataTable().ajax.reload();
-                    $("#penawaran-form-edit")[0].reset();
-                    window.location.href = "/penawaran_projects";
-                });
-            },
-            error: function (xhr) {
-                $("#loading").hide();
-                const errors = xhr.responseJSON?.errors;
-                console.error("Submission errors:", errors);
-
-                let errorMessage = '';
-                if (typeof errors === 'object' && errors !== null) {
-                    // Handle nested error objects
-                    const formatErrors = (obj, prefix = '') => {
-                        let message = '';
-                        for (let key in obj) {
-                            if (Array.isArray(obj[key])) {
-                                message += `${prefix}${key}: ${obj[key].join(', ')}\n`;
-                            } else if (typeof obj[key] === 'object' && obj[key] !== null) {
-                                message += formatErrors(obj[key], `${prefix}${key}.`);
-                            } else {
-                                message += `${prefix}${key}: ${obj[key]}\n`;
-                            }
-                        }
-                        return message;
-                    };
-                    errorMessage = formatErrors(errors);
-                } else {
-                    errorMessage = xhr.responseJSON?.message || 'Terjadi kesalahan saat menyimpan data';
-                }
-
-                Swal.fire({
-                    icon: "error",
-                    title: "Error",
-                    text: errorMessage.trim(),
-                });
-            },
-        });
-    };
 
     function deleteSurvey(surveyId) {
         Swal.fire({
@@ -250,14 +186,4 @@ function downloadFile(id, type) {
             }
         });
     }
-
-    $(document).ready(function () {
-        function handleFormSubmit(formSelector, submitFunction) {
-            $(formSelector).on("submit", function (e) {
-                e.preventDefault();
-                submitFunction();
-            });
-        }
-        handleFormSubmit("#penawaran-form-edit", updatePenawaranData);
-    });
     </script>

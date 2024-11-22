@@ -9,7 +9,12 @@
             {{ __('Ensure your account is using a long, random password to stay secure.') }}
         </p>
     </header>
-
+    @if (session('status'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session('status') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
     <form id="update_password_form" method="post" action="{{ route('password.update') }}" class="mt-6 space-y-6">
         @csrf
         @method('put')
@@ -44,6 +49,22 @@
     </form>
 </section>
 
-@push('js')
-    @include('profile.partials.script')
+@push('scripts')
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("update-password-form");
+    const loadingOverlay = document.getElementById("loading");
+    const submitButton = form.querySelector("button[type='submit']");
+
+    if (form && loadingOverlay && submitButton) {
+        form.addEventListener("submit", function (e) {
+            loadingOverlay.style.display = "flex"; // Tampilkan overlay
+            submitButton.disabled = true; // Nonaktifkan tombol
+            submitButton.textContent = "Loading..."; // Ubah teks tombol
+        });
+    } else {
+        console.error("Form, loading overlay, atau tombol submit tidak ditemukan!");
+    }
+});
+</script>
 @endpush

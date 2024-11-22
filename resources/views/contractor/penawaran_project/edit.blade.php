@@ -1,8 +1,8 @@
 @extends('layouts.contractor')
 @section('title', 'Edit Penawaran Projects')
 @section('content')
-    <hr />
-    @include('components.loading')
+@include('components.loading')
+<hr />
     <div class="container bg-white p-4 rounded shadow">
         <form id="penawaran-form-edit" action="{{ route('penawaran_projects.update', $penawaran->id) }}" method="POST" enctype="multipart/form-data">
             @csrf
@@ -20,36 +20,11 @@
 
             <!-- File PDF -->
             <div class="mb-3">
-                <label for="file_pdf" class="form-label">File PDF</label>
-                <input type="file" name="file_pdf" class="form-control">
-                @if ($errors->has('file_pdf'))
-                    <span class="text-danger small">{{ $errors->first('file_pdf') }}</span>
-                @endif
-                <!-- Tampilkan File PDF yang Sudah Disimpan -->
-                @if ($penawaran->file_pdf)
-                    <div class="mt-2">
-                        <a href="{{ asset('storage/pdf/' . $penawaran->file_pdf) }}" target="_blank" class="btn btn-outline-secondary btn-sm">
-                            Lihat File PDF
-                        </a>
-                    </div>
-                @endif
-            </div>
-
-            <!-- File Excel -->
-            <div class="mb-3">
-                <label for="file_excel" class="form-label">File Excel</label>
-                <input type="file" name="file_excel" class="form-control">
-                @if ($errors->has('file_excel'))
-                    <span class="text-danger small">{{ $errors->first('file_excel') }}</span>
-                @endif
-                <!-- Tampilkan File Excel yang Sudah Disimpan -->
-                @if ($penawaran->file_excel)
-                    <div class="mt-2">
-                        <a href="{{ asset('storage/excel/' . $penawaran->file_excel) }}" target="_blank" class="btn btn-outline-secondary btn-sm">
-                            Lihat File Excel
-                        </a>
-                    </div>
-                @endif
+                <label for="image" class="form-label">File</label>
+                <input type="file" id="file" name="file[]" class="form-control" multiple>
+                @error('file')
+                    <span class="text-danger small">{{ $message }}</span>
+                @enderror
             </div>
 
             <!-- Tombol -->
@@ -64,6 +39,22 @@
         </form>
     </div>
     @push('js')
-        @include('contractor.penawaran_project.script')
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.getElementById("penawaran-form-edit");
+            const loadingOverlay = document.getElementById("loading");
+            const submitButton = form.querySelector("button[type='submit']");
+
+            if (form && loadingOverlay && submitButton) {
+                form.addEventListener("submit", function () {
+                    loadingOverlay.style.display = "flex"; // Tampilkan loading overlay
+                    submitButton.disabled = true; // Nonaktifkan tombol submit
+                    submitButton.textContent = "Loading..."; // Ubah teks tombol
+                });
+            } else {
+                console.error("Form, loading overlay, atau tombol submit tidak ditemukan!");
+            }
+        });
+    </script>
     @endpush
 @endsection

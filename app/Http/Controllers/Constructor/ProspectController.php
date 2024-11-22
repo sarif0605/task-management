@@ -16,7 +16,7 @@ class ProspectController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['isVerificationAccount', 'isStatusAccount'])->only('store', 'create', 'edit', 'update', 'destroy');
+        $this->middleware(['verified', 'isStatusAccount'])->only('store', 'create', 'edit', 'update', 'destroy');
     }
 
     /**
@@ -51,7 +51,7 @@ class ProspectController extends Controller
             'file' => 'required|mimes:xlsx,xls,csv',
         ]);
         Excel::import(new ProspectExport, $request->file('file'));
-        return redirect()->back()->with('success', 'Data berhasil diimport!');
+        return redirect('/prospects')->with('status','Berhasil melakukan import data prospect!');
     }
 
     /**
@@ -71,9 +71,9 @@ class ProspectController extends Controller
             $data = $request->validated();
             $prospect = new Prospect($data);
             $prospect->save();
-            return response()->json(['message' => 'Prospect created successfully.'], 200);
+            return redirect()->route('prospects')->with('status', 'Data prospect berhasil disimpan');
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to create prospect: '.$e->getMessage()], 500);
+            return redirect()->back()->with('error', 'Data prospect gagal disimpan');
         }
     }
 
@@ -111,11 +111,11 @@ class ProspectController extends Controller
         $prospect = Prospect::find($id);
         if (!$prospect) {
             return redirect()->route('prospects.edit')
-            ->with('error', 'Prospect dengan ID ' . $id . ' tidak ditemukan.');
+            ->with('error', 'Prospect dengan Nama ' . $prospect->nama_produk . ' tidak ditemukan.');
         }
         $data = $request->validated();
         $prospect->update($data);
-        return redirect()->route('prospects')->with('success', 'Prospect updated successfully.');
+        return redirect()->route('prospects')->with('success', 'Prospect berhasil diubah.');
     }
 
     /**
@@ -125,9 +125,9 @@ class ProspectController extends Controller
     {
         $prospect = Prospect::find($id);
         if (!$prospect) {
-            return response()->json(['message' => 'Prospect not found'], 404);
+            return redirect()->route('prospects')->with('error', 'prospect gagal dihapus');
         }
         $prospect->delete();
-        return response()->json(['message' => 'Prospect deleted successfully'], 200);
+        return redirect()->route('prospects')->with('success', 'prospect berhasil dihapus');
     }
 }

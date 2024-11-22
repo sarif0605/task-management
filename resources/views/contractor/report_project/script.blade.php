@@ -8,6 +8,13 @@
             url: "{{ route('report_projects') }}",
             type: "GET",
             dataType: "json",
+            data: function(d) {
+                d.deal_project_id = $('#deal_project').val(); // Send the selected deal_project_id
+            },
+            dataSrc: function (json) {
+                console.log(json); // Log data yang diterima
+                return json.data; // Mengambil data dari response
+            },
             headers: {
                 "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
             },
@@ -85,6 +92,11 @@
         ],
     });
 
+    $('#deal_project').on('change', function () {
+        $('#table-report').DataTable().ajax.reload(); // Reload data tabel saat dropdown berubah
+    });
+
+    // Delete action handling
     $("#table-report").on("click", ".delete-btn", function () {
         const surveyId = $(this).data("id");
         deleteSurvey(surveyId);

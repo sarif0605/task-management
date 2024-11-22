@@ -85,6 +85,17 @@
 </div>
 
 @push('scripts')
-    @include('auth.script')
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("register-form");
+        const loadingOverlay = document.getElementById("loading");
+        const submitButton = form.querySelector("button[type='submit']");
+        form.addEventListener("submit", function (e) {
+            loadingOverlay.style.display = "flex";
+            submitButton.disabled = true;
+            submitButton.textContent = "Loading...";
+        });
+    });
+</script>
 @endpush
 @endsection

@@ -43,12 +43,14 @@ $(document).ready(function () {
                     return `<a href="https://wa.me/+${data}" target="_blank">${data}</a>`;
                 }
             },
-            {
-                data: "date",
-                render: function (data, type, row) {
-                    return data ? data : "date";
-                }
-            },
+            { data: "prospect.keterangan",
+                    render: function (data, type, row) {
+                        return data.length > 15 ? data.substring(0, 15) + "..." : data;
+                    }
+                },
+                {
+                    data : "prospect.tanggal"
+                },
             {
                 data: "survey_results",
                 render: function (data, type, row) {
@@ -56,6 +58,12 @@ $(document).ready(function () {
                         return data.substring(0, 15) + "...";
                     }
                     return data ? data : "survey";
+                }
+            },
+            {
+                data: "date",
+                render: function (data, type, row) {
+                    return data ? data : "date";
                 }
             },
             {
@@ -126,63 +134,6 @@ $(document).ready(function () {
     });
 });
 
-    const updateSurveyData = () => {
-        $("#loading").show();
-        const formData = new FormData($("#survey-form-edit")[0]);
-        $.ajax({
-            url: $("#survey-form-edit").attr("action"),
-            type: "POST",
-            data: formData,
-            processData: false,  // Important for FormData
-            contentType: false,  // Important for FormData
-            headers: {
-                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
-            },
-            success: function (response) {
-                $("#loading").hide();
-                Swal.fire({
-                    position: "top-end",
-                    icon: "success",
-                    title: "Data berhasil diperbarui",
-                    showConfirmButton: false,
-                    timer: 1500,
-                }).then(() => {
-                    $("#table-survey").DataTable().ajax.reload();
-                    $("#survey-form-edit")[0].reset();
-                    window.location.href = "/surveys";
-                });
-            },
-            error: function (xhr) {
-                $("#loading").hide();
-                const errors = xhr.responseJSON?.errors;
-                let errorMessage = '';
-                if (typeof errors === 'object' && errors !== null) {
-                    const formatErrors = (obj, prefix = '') => {
-                        let message = '';
-                        for (let key in obj) {
-                            if (Array.isArray(obj[key])) {
-                                message += `${prefix}${key}: ${obj[key].join(', ')}\n`;
-                            } else if (typeof obj[key] === 'object' && obj[key] !== null) {
-                                message += formatErrors(obj[key], `${prefix}${key}.`);
-                            } else {
-                                message += `${prefix}${key}: ${obj[key]}\n`;
-                            }
-                        }
-                        return message;
-                    };
-                    errorMessage = formatErrors(errors);
-                } else {
-                    errorMessage = xhr.responseJSON?.message || 'Terjadi kesalahan saat menyimpan data';
-                }
-                Swal.fire({
-                    icon: "error",
-                    title: "Error",
-                    text: errorMessage.trim(),
-                });
-            },
-        });
-    };
-
     function deleteSurvey(surveyId) {
         Swal.fire({
             title: "Apakah Anda Yakin?",
@@ -221,15 +172,4 @@ $(document).ready(function () {
             }
         });
     }
-
-    $(document).ready(function () {
-        function handleFormSubmit(formSelector, submitFunction) {
-            $(formSelector).on("submit", function (e) {
-                e.preventDefault();
-                submitFunction();
-            });
-        }
-        handleFormSubmit("#survey-form", createData);
-        handleFormSubmit("#survey-form-edit", updateSurveyData);
-    });
     </script>

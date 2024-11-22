@@ -82,66 +82,6 @@
         });
     });
 
-    const updateDealData = () => {
-        $("#loading").show();
-        const formData = new FormData($("#deal-form-update")[0]);
-        $.ajax({
-            url: $("#deal-form-update").attr("action"),
-            type: "POST",
-            data: formData,
-            processData: false,  // Important for FormData
-            contentType: false,  // Important for FormData
-            headers: {
-                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
-            },
-            success: function (response) {
-                $("#loading").hide();
-                Swal.fire({
-                    position: "top-end",
-                    icon: "success",
-                    title: "Data berhasil diperbarui",
-                    showConfirmButton: false,
-                    timer: 1500,
-                }).then(() => {
-                    $("#table-deal").DataTable().ajax.reload();
-                    $("#deal-form-update")[0].reset();
-                    window.location.href = "/deal_projects";
-                });
-            },
-            error: function (xhr) {
-                $("#loading").hide();
-                const errors = xhr.responseJSON?.errors;
-                console.error("Submission errors:", errors);
-                let errorMessage = '';
-                if (typeof errors === 'object' && errors !== null) {
-                    // Handle nested error objects
-                    const formatErrors = (obj, prefix = '') => {
-                        let message = '';
-                        for (let key in obj) {
-                            if (Array.isArray(obj[key])) {
-                                message += `${prefix}${key}: ${obj[key].join(', ')}\n`;
-                            } else if (typeof obj[key] === 'object' && obj[key] !== null) {
-                                message += formatErrors(obj[key], `${prefix}${key}.`);
-                            } else {
-                                message += `${prefix}${key}: ${obj[key]}\n`;
-                            }
-                        }
-                        return message;
-                    };
-                    errorMessage = formatErrors(errors);
-                } else {
-                    errorMessage = xhr.responseJSON?.message || 'Terjadi kesalahan saat menyimpan data';
-                }
-
-                Swal.fire({
-                    icon: "error",
-                    title: "Error",
-                    text: errorMessage.trim(),
-                });
-            },
-        });
-    };
-
     function deleteSurvey(surveyId) {
         Swal.fire({
             title: "Apakah Anda Yakin?",
@@ -180,14 +120,4 @@
             }
         });
     }
-
-    $(document).ready(function () {
-        function handleFormSubmit(formSelector, submitFunction) {
-            $(formSelector).on("submit", function (e) {
-                e.preventDefault();
-                submitFunction();
-            });
-        }
-        handleFormSubmit("#deal-form-update", updateDealData);
-    });
     </script>

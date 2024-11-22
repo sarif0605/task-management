@@ -22,7 +22,7 @@ class DealProjectController extends Controller
 
      public function __construct()
     {
-        $this->middleware(['isVerificationAccount', 'isStatusAccount'])->only('store', 'create', 'edit', 'update', 'destroy');
+        $this->middleware(['verified', 'isStatusAccount'])->only('store', 'create', 'edit', 'update', 'destroy');
     }
 
     public function index(Request $request)
@@ -150,24 +150,11 @@ class DealProjectController extends Controller
 
             DB::commit();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Deal Project berhasil diperbarui'
-            ]);
+            return redirect()->route('deal_projects')->with('success', 'berhasil update data');
 
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Deal Project Update Failed:', [
-                'message' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString()
-            ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal memperbarui Deal Project: ' . $e->getMessage()
-            ], 500);
+            return redirect()->route('deal_projects')->with('error', 'gagal mengubah data');
         }
     }
 

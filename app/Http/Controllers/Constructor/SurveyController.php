@@ -46,7 +46,7 @@ class SurveyController extends Controller
                 $prospect->save();
             }
         }
-        return response()->json(['message' => 'Survey created successfully.'], 200);
+        return redirect()->route('prospects')->with('status', 'berhasil mengubah ke data survey');
     }
 
     /**
@@ -116,10 +116,10 @@ public function update(SurveyUpdateRequest $request, string $id)
             }
         }
         DB::commit();
-        return redirect()->route('surveys');
+        return redirect()->route('surveys')->with('status', 'berhasil mengubah data survey');
     } catch (\Exception $e) {
         DB::rollBack();
-        return redirect()->route('surveys');
+        return redirect()->route('surveys')->with('error', 'gagal memperbarui data survey');
     }
 }
 

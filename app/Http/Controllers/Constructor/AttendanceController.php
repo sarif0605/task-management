@@ -14,7 +14,7 @@ class AttendanceController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['isVerificationAccount', 'isStatusAccount'])->only('store', 'create', 'edit', 'update', 'destroy');
+        $this->middleware(['verified', 'isStatusAccount'])->only('store', 'create', 'edit', 'update', 'destroy');
     }
 
     /**

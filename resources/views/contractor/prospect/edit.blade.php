@@ -78,7 +78,18 @@
             box-shadow: none;
         }
     </style>
-    @push('js')
-        @include('contractor.prospect.script')
+    @push('scripts')
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.getElementById("prospect-form-edit");
+            const loadingOverlay = document.getElementById("loading");
+            const submitButton = form.querySelector("button[type='submit']");
+            form.addEventListener("submit", function (e) {
+                loadingOverlay.style.display = "flex";
+                submitButton.disabled = true;
+                submitButton.textContent = "Loading...";
+            });
+        });
+    </script>
     @endpush
 @endsection

@@ -32,13 +32,13 @@
       <i class="fas fa-fw fa-tachometer-alt"></i>
       <span>Absensi</span></a>
   </li>
-
+  @if (Auth::check() && !Auth::user()->hasPosition('Pengawas'))
   <li class="nav-item">
     <a class="nav-link" href="{{ route('prospects') }}">
       <i class="fas fa-fw fa-tachometer-alt"></i>
       <span>Prospect</span></a>
   </li>
-
+@endif
   <li class="nav-item">
     <a class="nav-link" href="{{ route('surveys') }}">
       <i class="fas fa-fw fa-tachometer-alt"></i>

@@ -23,8 +23,7 @@ class PenawaranProjectUpdateRequest extends FormRequest
     {
         return [
             'pembuat_penawaran' => 'nullable|string|max:30',
-            'file_pdf' => 'nullable|file|mimes:pdf|max:10240',
-            'file_excel' => 'nullable|file|mimes:xlsx,xls|max:10240',
+            'file.*' => 'nullable|file|max:10204',
         ];
     }
 }

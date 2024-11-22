@@ -7,16 +7,21 @@
         <div class="card shadow-lg px-5 py-4 border-0 w-100"
              style="max-width: 800px; background: linear-gradient(135deg, #ffffff, #f8f9fc); border-radius: 15px;">
                 <div class="text-center mb-4">
-                    <h1 class="h4 text-gray-900">Register User!</h1>
+                    <h1 class="h4 text-gray-900">Verifikasi Email!</h1>
                 </div>
+                @if (session('status'))
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        {{ session('status') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                @endif
                 <div class="card-body">
                 <p class="text-gray-600">
-                    Thanks for signing up! Before getting started, could you verify your email address by clicking on
-                    the link we just emailed to you? If you didn't receive the email, we will gladly send you another.
+                    Terima kasih telah mendaftar! Sebelum memulai, bisakah Anda memverifikasi alamat email Anda dengan mengklik tautan yang baru saja kami kirim ke email Anda? Jika Anda tidak menerima email tersebut, kami dengan senang hati akan mengirimkan email lainnya kepada Anda.
                 </p>
                 @if (session('status') == 'verification-link-sent')
                     <div class="alert alert-success" role="alert">
-                        A new verification link has been sent to the email address you provided during registration.
+                        Tautan verifikasi baru telah dikirim ke alamat email yang Anda berikan saat pendaftaran.
                     </div>
                 @endif
                 <div class="d-flex justify-content-between align-items-center mt-4">
@@ -40,6 +45,17 @@
 </div>
 
 @push('scripts')
-    @include('auth.script')
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("verification-form");
+        const loadingOverlay = document.getElementById("loading");
+        const submitButton = form.querySelector("button[type='submit']");
+        form.addEventListener("submit", function (e) {
+            loadingOverlay.style.display = "flex";
+            submitButton.disabled = true;
+            submitButton.textContent = "Loading...";
+        });
+    });
+</script>
 @endpush
 @endsection

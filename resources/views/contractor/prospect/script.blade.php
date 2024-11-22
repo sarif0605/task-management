@@ -39,9 +39,9 @@
                         return data.length > 15 ? data.substring(0, 15) + "..." : data;
                     }
                 },
-                {
-                    data : 'status'
-                },
+                // {
+                //     data : 'status'
+                // },
                 {
                     data: null,
                     render: function (data) {
@@ -95,94 +95,6 @@
             deleteProspect(prospectId, namaProduk);
         });
     });
-
-    const createData = () => {
-        $("#loading").show();
-        $.ajax({
-            url: $("#prospect-form").attr("action"),
-            type: "POST",
-            data: $("#prospect-form").serialize(),
-            headers: {
-                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
-            },
-            success: function (response) {
-                $("#loading").hide();
-                Swal.fire({
-                    position: "top-end",
-                    icon: "success",
-                    title: "Berhasil Menyimpan Data",
-                    showConfirmButton: false,
-                    timer: 1500,
-                }).then(() => {
-                    $("#table-prospect").DataTable().ajax.reload();
-                    $("#prospect-form")[0].reset();
-                    window.location.href = "/prospects";
-                });
-            },
-            error: function (xhr) {
-                $("#loading").hide();
-                    const errors = xhr.responseJSON?.errors;
-                    console.error("Submission errors:", errors);
-                    let errorMessage = '';
-                    if (typeof errors === 'object') {
-                        for (let field in errors) {
-                            errorMessage += `${field}: ${errors[field].join(', ')}\n`;
-                        }
-                    } else {
-                        errorMessage = 'Terjadi kesalahan saat menyimpan data';
-                    }
-                    Swal.fire({
-                        icon: "error",
-                        title: "Error",
-                        text: errorMessage
-                    });
-            },
-        });
-    };
-
-    const updateProspectData = () => {
-        $("#loading").show();
-        $.ajax({
-            url: $("#prospect-form-edit").attr("action"),
-            type: "POST",
-            data: $("#prospect-form-edit").serialize(),
-            headers: {
-                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
-            },
-            success: function (response) {
-                $("#loading").hide();
-                Swal.fire({
-                    position: "top-end",
-                    icon: "success",
-                    title: "Data berhasil diperbarui",
-                    showConfirmButton: false,
-                    timer: 1500,
-                }).then(() => {
-                    $("#table-prospect").DataTable().ajax.reload();
-                    $("#prospect-form-edit")[0].reset();
-                    window.location.href = "/prospects";
-                });
-            },
-            error: function (xhr) {
-                $("#loading").hide();
-                    const errors = xhr.responseJSON?.errors;
-                    console.error("Submission errors:", errors);
-                    let errorMessage = '';
-                    if (typeof errors === 'object') {
-                        for (let field in errors) {
-                            errorMessage += `${field}: ${errors[field].join(', ')}\n`;
-                        }
-                    } else {
-                        errorMessage = 'Terjadi kesalahan saat menyimpan data';
-                    }
-                    Swal.fire({
-                        icon: "error",
-                        title: "Error",
-                        text: errorMessage
-                    });
-            },
-        });
-    }
 
     function deleteProspect(prospectId, namaProduk) {
         Swal.fire({
@@ -252,15 +164,7 @@
             contentType: false,
             success: function (response) {
                 $("#loading").hide();
-                Swal.fire({
-                    position: "top-end",
-                    icon: "success",
-                    title: "Survey berhasil dibuat",
-                    showConfirmButton: false,
-                    timer: 1500,
-                }).then(() => {
-                    $("#table-prospect").DataTable().ajax.reload(); // Reload tabel
-                });
+                $("#table-prospect").DataTable().ajax.reload(); // Reload tabel
             },
             error: function (xhr) {
                 $("#loading").hide();
@@ -270,11 +174,6 @@
                 if (errors) {
                     errorMessage = Object.values(errors).map(e => e.join(', ')).join('\n');
                 }
-                Swal.fire({
-                    icon: "error",
-                    title: "Error",
-                    text: errorMessage
-                });
             },
         });
     };
@@ -294,15 +193,7 @@
             contentType: false,
             success: function (response) {
                 $("#loading").hide();
-                Swal.fire({
-                    position: "top-end",
-                    icon: "success",
-                    title: "Penawaran Project berhasil dibuat",
-                    showConfirmButton: false,
-                    timer: 1500,
-                }).then(() => {
-                    $("#table-prospect").DataTable().ajax.reload();
-                });
+                $("#table-prospect").DataTable().ajax.reload();
             },
             error: function (xhr) {
                 $("#loading").hide();
@@ -312,11 +203,6 @@
                 if (errors) {
                     errorMessage = Object.values(errors).map(e => e.join(', ')).join('\n');
                 }
-                Swal.fire({
-                    icon: "error",
-                    title: "Error",
-                    text: errorMessage
-                });
             },
         });
     };
@@ -336,15 +222,7 @@
             contentType: false,
             success: function (response) {
                 $("#loading").hide();
-                Swal.fire({
-                    position: "top-end",
-                    icon: "success",
-                    title: "Deal Project berhasil dibuat",
-                    showConfirmButton: false,
-                    timer: 1500,
-                }).then(() => {
-                    $("#table-prospect").DataTable().ajax.reload();
-                });
+                $("#table-prospect").DataTable().ajax.reload();
             },
             error: function (xhr) {
                 $("#loading").hide();
@@ -354,11 +232,6 @@
                 if (errors) {
                     errorMessage = Object.values(errors).map(e => e.join(', ')).join('\n');
                 }
-                Swal.fire({
-                    icon: "error",
-                    title: "Error",
-                    text: errorMessage
-                });
             },
         });
     };
@@ -370,8 +243,6 @@
                 submitFunction();
             });
         }
-        handleFormSubmit("#prospect-form", createData);
-        handleFormSubmit("#prospect-form-edit", updateProspectData);
         handleFormSubmit("#survey-form", createSurvey);
     });
     </script>

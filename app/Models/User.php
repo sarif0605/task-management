@@ -51,6 +51,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasOne(Profiles::class, 'user_id');
     }
 
+    public function hasPosition($positionName)
+    {
+        return $this->position()->where('name', $positionName)->exists();
+    }
+
     public function deal_project_users(){
         return $this->hasMany(DealProjectUsers::class, 'user_id');
     }

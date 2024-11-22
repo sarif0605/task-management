@@ -3,6 +3,12 @@
 @section('content')
     <hr class="mb-1" />
     <div class="card shadow mb-4">
+        @if (session('status'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ session('status') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
         <div class="card-body">
             <div class="table-responsive">
                 <table class="table table-bordered" id="table-deal" width="100%" cellspacing="0">

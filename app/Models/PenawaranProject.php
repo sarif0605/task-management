@@ -26,4 +26,8 @@ class PenawaranProject extends Model
     {
         return $this->belongsTo(Prospect::class);
     }
+
+    public function file_penawaran_project(){
+        return $this->hasMany(FilePenawaranProjects::class, 'penawaran_project_id', 'id');
+    }
 }

@@ -1,4 +1,5 @@
 @extends('auth.header')
+@section('head', 'Verifikasi Email')
 @section('content')
 @include('components.loading')
 
@@ -44,18 +45,18 @@
     </div>
 </div>
 
-@push('scripts')
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const form = document.getElementById("verification-form");
-        const loadingOverlay = document.getElementById("loading");
-        const submitButton = form.querySelector("button[type='submit']");
-        form.addEventListener("submit", function (e) {
-            loadingOverlay.style.display = "flex";
-            submitButton.disabled = true;
-            submitButton.textContent = "Loading...";
+@push('js')
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.getElementById("verification-form");
+            const loadingOverlay = document.getElementById("loading");
+            const submitButton = form.querySelector("button[type='submit']");
+            form.addEventListener("submit", function (e) {
+                loadingOverlay.style.display = "flex";
+                submitButton.disabled = true;
+                submitButton.textContent = "Loading...";
+            });
         });
-    });
-</script>
-@endpush
+    </script>
+    @endpush
 @endsection

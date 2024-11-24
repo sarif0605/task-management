@@ -1,5 +1,6 @@
 @extends('auth.header')
 @section('title', 'Reset Password')
+@section('head', 'Reset Password')
 @section('content')
 <hr />
 @include('components.loading')

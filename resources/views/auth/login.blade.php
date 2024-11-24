@@ -1,5 +1,6 @@
 @extends('auth.header')
 @section('title', 'Login User')
+@section('head', 'Login User')
 @section('content')
 <hr />
 @include('components.loading')
@@ -41,22 +42,18 @@
         </div>
     </div>
 </div>
-@push('scripts')
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const form = document.getElementById("login-form");
-        const loadingOverlay = document.getElementById("loading");
-        const submitButton = form.querySelector("button[type='submit']");
-
-        form.addEventListener("submit", function (e) {
-            // Tampilkan overlay loading
-            loadingOverlay.style.display = "flex";
-
-            // Nonaktifkan tombol submit untuk mencegah submit ganda
-            submitButton.disabled = true;
-            submitButton.textContent = "Loading...";
+@push('js')
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.getElementById("login-form");
+            const loadingOverlay = document.getElementById("loading");
+            const submitButton = form.querySelector("button[type='submit']");
+            form.addEventListener("submit", function (e) {
+                loadingOverlay.style.display = "flex";
+                submitButton.disabled = true;
+                submitButton.textContent = "Loading...";
+            });
         });
-    });
-</script>
-@endpush
+    </script>
+    @endpush
 @endsection

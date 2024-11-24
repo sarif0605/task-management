@@ -8,8 +8,8 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Login</title>
-
+    <title>@yield('head', 'Default Title')</title>
+    <link rel="icon" href="{{ asset('admin/img/bnp-bg.png') }}" type="image/png">
     <!-- Custom fonts for this template-->
     {{-- <link href="{{asset('admin/vendor/fontawesome-free/css/all.min.css')}}" rel="stylesheet" type="text/css">
     {{-- <link href="https://fonts.googleapis.com/css?family=Nunito:200,300,400,600,700,800,900" rel="stylesheet">
@@ -45,6 +45,6 @@
 
     <!-- Stack for additional scripts -->
     @yield('js')
-    @stack('scripts')
+    @stack('js')
 </body>
 </html>

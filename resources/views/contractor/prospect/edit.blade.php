@@ -1,7 +1,5 @@
 @extends('layouts.contractor')
-
 @section('title', 'Edit Product')
-
 @section('content')
     <hr />
     @include('components.loading')
@@ -51,34 +49,23 @@
         </div>
         <div class="row">
             <div class="col mb-3">
-                <div class="col mb-3">
-                    <label class="form-label">Lokasi</label>
-                    <textarea class="form-control form-control-underline" name="lokasi" placeholder="Lokasi" >{{ $prospect->lokasi }}</textarea>
-                    @if ($errors->has('lokasi'))
-                        <span class="text-danger small">{{ $errors->first('lokasi') }}</span>
-                    @endif
-                </div>
+                <label class="form-label">Lokasi</label>
+                <textarea class="form-control form-control-underline" name="lokasi" placeholder="Lokasi" >{{ $prospect->lokasi }}</textarea>
+                @if ($errors->has('lokasi'))
+                    <span class="text-danger small">{{ $errors->first('lokasi') }}</span>
+                @endif
             </div>
         </div>
-        <button class="btn btn-primary">Update</button>
-        <a href="{{ route('prospects') }}" class="btn btn-warning">Kembali</a>
+        <div class="row">
+            <div class="col-md-6 d-grid">
+                <button type="submit" class="btn btn-warning">Update</button>
+            </div>
+            <div class="col-md-6 d-grid">
+                <a href="{{ route('surveys') }}" class="btn btn-primary">Kembali</a>
+            </div>
+        </div>
     </form>
-    <style>
-        .form-control-underline {
-            border: none;
-            border-bottom: 1px solid #ced4da;
-            border-radius: 0;
-            background-color: transparent;
-            box-shadow: none;
-        }
-
-        .form-control-underline:focus {
-            border-bottom: 2px solid #007bff;
-            outline: none;
-            box-shadow: none;
-        }
-    </style>
-    @push('scripts')
+    @push('js')
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const form = document.getElementById("prospect-form-edit");

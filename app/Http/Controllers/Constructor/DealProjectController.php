@@ -11,7 +11,6 @@ use App\Http\Requests\DealProject\DealProjectUpdateRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class DealProjectController extends Controller
@@ -79,9 +78,9 @@ class DealProjectController extends Controller
      */
 
      public function show($id) {
-        $dealProject = DealProject::with('prospect')->find($id);
+        $dealProject = DealProject::with(['prospect', 'deal_project_users.user.profile'])->find($id);
         if (!$dealProject) {
-            return redirect()->route('deal_projects');
+            return redirect()->route('deal_projects')->with('error', 'Deal Project tidak ditemukan.');
         }
         return view('contractor.done_deal.show', compact('dealProject'));
     }
@@ -161,17 +160,31 @@ class DealProjectController extends Controller
     public function destroy(string $id)
     {
         $dealProject = DealProject::find($id);
+
+        // Jika Deal Project tidak ditemukan
         if (!$dealProject) {
-            return redirect()->route('done_deals')
-            ->with('error', 'Survey dengan ID ' . $id . ' tidak ditemukan.');
+            return response()->json([
+                'success' => false,
+                'message' => 'Deal Project dengan ID ' . $id . ' tidak ditemukan.'
+            ], 404);
         }
+
+        // Menghapus file RAB jika ada
         if (!empty($dealProject->rab)) {
             Storage::disk('local')->delete('public/rab/' . $dealProject->rab);
         }
+
+        // Menghapus file RAP jika ada
         if (!empty($dealProject->rap)) {
             Storage::disk('local')->delete('public/rap/' . $dealProject->rap);
         }
+
+        // Menghapus Deal Project
         $dealProject->delete();
-        return redirect()->route('done_deals')->with('success', 'Deal Project deleted successfully.');
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Deal Project deleted successfully.'
+        ], 200);
     }
 }

@@ -9,7 +9,11 @@ use App\Exports\ProspectExport;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\FilePenawaranProjects;
+use App\Models\PenawaranProject;
+use App\Models\SurveyImages;
 use App\Models\User;
+use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ProspectController extends Controller
@@ -115,7 +119,7 @@ class ProspectController extends Controller
         }
         $data = $request->validated();
         $prospect->update($data);
-        return redirect()->route('prospects')->with('success', 'Prospect berhasil diubah.');
+        return redirect()->route('prospects')->with('status', 'Data prospect berhasil diubah');
     }
 
     /**
@@ -124,10 +128,44 @@ class ProspectController extends Controller
     public function destroy($id)
     {
         $prospect = Prospect::find($id);
+
         if (!$prospect) {
-            return redirect()->route('prospects')->with('error', 'prospect gagal dihapus');
+            return response()->json([
+                'success' => false,
+                'message' => 'Prospect gagal dihapus. Data tidak ditemukan.',
+            ], 404); // Menggunakan kode status HTTP 404 untuk resource not found
+        }
+        foreach ($prospect->survey as $survey) {
+            $existingImages = SurveyImages::where('survey_id', $survey->id)->get();
+            foreach ($existingImages as $existingImage) {
+                Storage::disk('local')->delete('public/survey/' . $existingImage->image_url);
+                $existingImage->delete();
+            }
+            $survey->delete();
+        }
+
+        foreach ($prospect->penawaran_project as $penawaran) {
+            $existingImages = FilePenawaranProjects::where('penawaran_project_id', $penawaran->id)->get();
+            foreach ($existingImages as $existingImage) {
+                Storage::disk('local')->delete('public/penawaran/' .$existingImage->file);
+                $existingImage->delete();
+            }
+            $penawaran->delete();
+        }
+
+        foreach ($prospect->deal_project as $deal) {
+            if (!empty($deal->rab)) {
+                Storage::disk('local')->delete('public/rab/' . $deal->rab);
+            }
+            if (!empty($deal->rap)) {
+                Storage::disk('local')->delete('public/rap/' . $deal->rap);
+            }
+            $deal->delete();
         }
         $prospect->delete();
-        return redirect()->route('prospects')->with('success', 'prospect berhasil dihapus');
+        return response()->json([
+            'success' => true,
+            'message' => 'Prospect berhasil dihapus.',
+        ], 200);
     }
 }

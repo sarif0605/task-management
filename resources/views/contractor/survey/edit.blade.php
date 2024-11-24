@@ -68,7 +68,7 @@
             </div>
         </form>
     </div>
-    @push('js')
+@push('js')
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const form = document.getElementById("survey-form-edit");
@@ -85,7 +85,6 @@
             console.error("Form, loading overlay, atau tombol submit tidak ditemukan!");
         }
     });
-
     // Script untuk preview gambar baru
     document.getElementById('imageInput').addEventListener('change', function (event) {
         const imagePreview = document.getElementById('imagePreview');

@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Constructor;
 use App\Http\Requests\Survey\SurveyCreateRequest;
 use App\Http\Requests\Survey\SurveyUpdateRequest;
 use App\Models\Prospect;
-use Illuminate\Support\Facades\File;
 use App\Models\Survey;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -46,6 +45,7 @@ class SurveyController extends Controller
                 $prospect->save();
             }
         }
+        session()->put('success', 'Berhasil mengubah ke survey');
         return redirect()->route('prospects')->with('status', 'berhasil mengubah ke data survey');
     }
 
@@ -134,11 +134,10 @@ public function update(SurveyUpdateRequest $request, string $id)
         }
         try {
             DB::beginTransaction();
-            foreach ($survey->images as $image) {
-                if (!empty($image)) {
-                    Storage::disk('local')->delete('public/survey/' . $image);
-                }
-                $image->delete();
+            $existingImages = SurveyImages::where('survey_id', $survey->id)->get();
+            foreach ($existingImages as $existingImage) {
+                Storage::disk('local')->delete('public/survey/' . $existingImage->image_url);
+                $existingImage->delete();
             }
             $survey->delete();
             DB::commit();

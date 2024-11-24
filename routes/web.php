@@ -28,8 +28,18 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
+    if (auth()->check()) {
+        return redirect()->route('dashboard');
+    }
     return view('auth.login');
 });
+
+Route::get('/login', function () {
+    if (auth()->check()) {
+        return redirect()->route('dashboard');
+    }
+    return view('auth.login');
+})->name('login');
 
 Route::get('/register', function () {
     return view('auth.register');
@@ -107,7 +117,7 @@ Route::middleware('auth')->group(function () {
         Route::get('edit/{id}', 'edit')->name('penawaran_projects.edit');
         Route::put('update/{id}', 'update')->name('penawaran_projects.update');
         Route::delete('destroy/{id}', 'destroy')->name('penawaran_projects.destroy');
-        Route::post('download/{id}/{type}', 'downloadFile')->name('penawaran_projects.download');
+        Route::post('download-all/{id}', 'downloadAllFiles')->name('penawaran_projects.download_all');
     });
 
     Route::controller(SurveyController::class)->prefix('surveys')->group(function () {

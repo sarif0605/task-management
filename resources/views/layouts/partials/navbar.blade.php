@@ -15,7 +15,7 @@
                 <img class="img-profile rounded-circle"
     src="{{ auth()->user()->profile && auth()->user()->profile->image_url
                 ? asset('storage/profile/' . auth()->user()->profile->image_url)
-                : asset('img/default-profile.png') }}"
+                : asset('admin/img/default.png') }}"
     alt="Profile Image">
             </a>
             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">

@@ -42,11 +42,11 @@
                 },
                 {
                     data: "rab",
-                    render: (data) => data ? `<a href="/storage/${data}" target="_blank">Download</a>` : "RAB Tidak Ditemukan",
+                    render: (data) => data ? `<a href="/storage/rab/${data}" target="_blank">Download</a>` : "RAB Tidak Ditemukan",
                 },
                 {
                     data: "rap",
-                    render: (data) => data ? `<a href="/storage/${data}" target="_blank">Download</a>` : "RAP Tidak Ditemukan",
+                    render: (data) => data ? `<a href="/storage/rap/${data}" target="_blank">Download</a>` : "RAP Tidak Ditemukan",
                 },
                 {
                     data: "keterangan",
@@ -80,6 +80,10 @@
                 },
             ],
         });
+        $("#table-deal").on("click", ".delete-btn", function () {
+        const surveyId = $(this).data("id");
+        deleteSurvey(surveyId); // Fungsi untuk menghapus survei
+    });
     });
 
     function deleteSurvey(surveyId) {

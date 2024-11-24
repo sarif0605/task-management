@@ -4,9 +4,7 @@ namespace App\Http\Controllers\Constructor;
 
 use App\Exports\ReportProjectsExport;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\ReportProject\ReportProjectUpdateRequest;
 use App\Models\DealProject;
-use ArielMejiaDev\LarapexCharts\LarapexChart;
 use App\Models\ReportProject;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,48 +16,57 @@ class ReportProjectController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $user = Auth::user();
-            $query = ReportProject::with(['deal_project.prospect']); // Memuat relasi yang dibutuhkan
-            if ($request->has('deal_project_id') && $request->deal_project_id) {
-                $query->where('deal_project_id', $request->deal_project_id); // Filter berdasarkan deal_project_id
+            try {
+                $user = Auth::user();
+                $query = ReportProject::with(['deal_project.prospect', 'updatedBy']);
+                if ($request->has('deal_project_id') && $request->deal_project_id) {
+                    $query->where('deal_project_id', $request->deal_project_id);
+                    $progressData = ReportProject::calculateProjectProgress($request->deal_project_id);
+                    $chartData = [
+                        'chart' => [
+                            'type' => 'donut'
+                        ],
+                        'title' => [
+                            'text' => 'Project Progress'
+                        ],
+                        'series' => [
+                            round($progressData['totalProgress'], 2),
+                            round(100 - $progressData['totalProgress'], 2)
+                        ],
+                        'labels' => ['Completed', 'Remaining'],
+                        'colors' => ['#3498db', '#e74c3c']
+                    ];
+                }
+
+                if ($user->position === 'pengawas') {
+                    $query->whereHas('deal_project.deal_project_users', function($q) use ($user) {
+                        $q->where('user_id', $user->id);
+                    });
+                }
+
+                $reports = $query->orderBy('created_at', 'DESC')->get();
+
+                return response()->json([
+                    'status' => 'success',
+                    'data' => $reports,
+                    'chart' => $chartData ?? null,
+                    'progress' => isset($progressData) ? [
+                        'totalProgress' => round($progressData['totalProgress'], 2),
+                        'totalBobot' => round($progressData['totalBobot'], 2)
+                    ] : null
+                ]);
+
+            } catch (\Exception $e) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'An error occurred while processing your request',
+                    'error' => $e->getMessage()
+                ], 500);
             }
-            if ($user->position === 'pengawas') {
-                $query->whereHas('deal_project.deal_project_users', function($q) use ($user) {
-                    $q->where('user_id', $user->id);
-                });
-            }
-            $materials = $query->orderBy('created_at', 'DESC')->get();
-            return response()->json(['data' => $materials]);
         }
+
         $deals = DealProject::all();
         return view('contractor.report_project.index', compact('deals'));
-    }
-
-    public function chart($dealProjectId)
-    {
-        // Get all report projects for this deal project
-        $reportProjects = ReportProject::where('deal_project_id', $dealProjectId)->get();
-
-        // Calculate total progress
-        $totalProgress = $reportProjects->sum('progress');
-        $totalWeight = $reportProjects->sum('bobot');
-
-        // Create donut chart
-        $chart = (new LarapexChart)->donutChart()
-            ->setTitle('Project Progress')
-            ->setSubtitle('Overall Project Status')
-            ->addData([
-                $totalProgress,
-                $totalWeight - $totalProgress // Remaining progress
-            ])
-            ->setLabels(['Completed', 'Remaining']);
-
-        return view('contractor.report_project.index', [
-            'reportProjects' => $reportProjects,
-            'chart' => $chart,
-            'totalProgress' => $totalProgress,
-            'totalWeight' => $totalWeight
-        ]);
     }
 
     public function import(Request $request, $deal_project_id)
@@ -158,22 +165,6 @@ class ReportProjectController extends Controller
 
         return redirect()->back()->with('success', 'Project update recorded successfully');
     }
-
-
-    /**
-     * Update the specified resource in storage.
-     */
-    // public function update(ReportProjectUpdateRequest $request, string $id)
-    // {
-    //     $material = ReportProject::find($id);
-    //     if (!$material) {
-    //         return redirect()->route('report_projects.edit')
-    //         ->with('error', 'Material dengan ID ' . $id . ' tidak ditemukan.');
-    //     }
-    //     $data = $request->validated();
-    //     $material->update($data);
-    //     return redirect()->route('contractor.material.index')->with('success', 'Material updated successfully.');
-    // }
 
     /**
      * Remove the specified resource from storage.

@@ -24,8 +24,8 @@
                 { data: "pemilik" },
                 {
                     data: "lokasi",
-                    render: function (data, type, row) {
-                        return `<a href="${data}" target="_blank">maps</a>`;
+                    render: function (data) {
+                        return data ? `<a href="${data}" target="_blank">maps</a>` : '';
                     }
                 },
                  {
@@ -121,9 +121,11 @@
                             text: `Prospect dengan nama produk "${namaProduk}" telah dihapus.`,
                             timer: 2000,
                         });
-                        $("#table-prospect").DataTable().ajax.reload(); // Reload DataTable
+                        $("#table-prospect").DataTable().ajax.reload();
                     },
-                    error: function () {
+                    error: function (xhr) {
+                        console.log("Error deleting data", xhr);
+                        console.log(xhr.responseText); // Tambahkan ini
                         Swal.fire({
                             icon: "error",
                             title: "Oops...",

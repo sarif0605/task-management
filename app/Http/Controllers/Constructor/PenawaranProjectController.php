@@ -8,11 +8,11 @@ use App\Http\Requests\PenawaranProject\PenawaranProjectUpdateRequest;
 use App\Models\FilePenawaranProjects;
 use App\Models\PenawaranProject;
 use App\Models\Prospect;
-use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use ZipArchive;
 
 class PenawaranProjectController extends Controller
 {
@@ -46,13 +46,12 @@ class PenawaranProjectController extends Controller
      */
     public function show(string $id)
     {
-        $penawaran = PenawaranProject::with('prospect')->find($id);
+        $penawaran = PenawaranProject::with('file_penawaran_project', 'prospect')->find($id);
         if (!$penawaran) {
-            return response()->json(['error' => 'Penawaran not found'], 404);
+            return redirect()->route('penawaran_projects')
+            ->with('error', 'Penawaran Projects dengan ID ' . $id . ' tidak ditemukan.');
         }
-        return response()->json([
-            'penawaran' => $penawaran
-        ]);
+        return view('contractor.penawaran_project.show', compact('penawaran'));
     }
 
     /**
@@ -60,7 +59,7 @@ class PenawaranProjectController extends Controller
      */
     public function edit(string $id)
     {
-        $penawaran = PenawaranProject::find($id);
+        $penawaran = PenawaranProject::with('file_penawaran_project')->find($id);
         if (!$penawaran) {
             return redirect()->route('penawaran_projects.edit')
             ->with('error', 'Penawaran Projects dengan ID ' . $id . ' tidak ditemukan.');
@@ -136,12 +135,11 @@ class PenawaranProjectController extends Controller
         DB::beginTransaction();
         try {
             $penawaran = PenawaranProject::findOrFail($id);
-            if (!empty($penawaran->file_excel)) {
-                Storage::disk('local')->delete('public/excel/' . $penawaran->file_excel);
-            }
-            if (!empty($penawaran->file_pdf)) {
-                Storage::disk('local')->delete('public/pdf/' . $penawaran->file_pdf);
-            }
+            $existingImages = FilePenawaranProjects::where('penawaran_project_id', $penawaran->id)->get();
+                foreach ($existingImages as $existingImage) {
+                    Storage::disk('local')->delete('public/penawaran/' . $existingImage->file);
+                    $existingImage->delete();
+                }
             $penawaran->delete();
             DB::commit();
             Log::info('Penawaran Deleted Successfully', ['id' => $id]);
@@ -161,15 +159,23 @@ class PenawaranProjectController extends Controller
         }
     }
 
-    public function downloadFile($id, $type)
+    public function downloadAllFiles($id)
     {
-        $penawaran = PenawaranProject::findOrFail($id);
-        $folderPath = $type === 'pdf' ? 'public/pdf' : 'public/excel';
-        $fileName = $type === 'pdf' ? $penawaran->file_pdf : $penawaran->file_excel;
-        $filePath = "{$folderPath}/{$fileName}";
-        if (!Storage::exists($filePath)) {
-            return response()->json(['message' => 'File not found'], 404);
+        $penawaran = PenawaranProject::with('file_penawaran_project')->findOrFail($id);
+        $zipFileName = "penawaran_project_{$id}.zip";
+        $zipPath = storage_path("app/public/penawaran/{$zipFileName}");
+        $zip = new ZipArchive;
+        if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === true) {
+            foreach ($penawaran->file_penawaran_project as $file) {
+                $filePath = storage_path("app/public/penawaran/{$file->file}");
+                if (file_exists($filePath)) {
+                    $zip->addFile($filePath, $file->file);
+                }
+            }
+            $zip->close();
+        } else {
+            return response()->json(['message' => 'Failed to create zip file'], 500);
         }
-        return Storage::download($filePath);
+        return response()->download($zipPath)->deleteFileAfterSend(true);
     }
 }

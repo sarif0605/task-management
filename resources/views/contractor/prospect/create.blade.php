@@ -29,7 +29,7 @@
                 @endif
             </div>
             <div class="col">
-                <label for="no_telp">No Telp</label>
+                <label for="no_telp">No Telp</label> <span class="text-danger small">harus dimulai dengan 62</span>
                 <input type="number" name="no_telp" class="form-control" placeholder="No Telp">
             </div>
             @if ($errors->has('no_telp'))
@@ -47,25 +47,25 @@
         </div>
         <div class="row mb-3">
             <div class="col">
-                <div class="col">
-                    <label for="lokasi">Lokasi</label>
-                    <textarea class="form-control" name="lokasi" placeholder="Lokasi"></textarea>
-                    @if ($errors->has('lokasi'))
-                        <span class="text-danger small">{{ $errors->first('lokasi') }}</span>
-                    @endif
-                </div>
+                <label for="lokasi">Lokasi</label>
+                <textarea class="form-control" name="lokasi" placeholder="Lokasi"></textarea>
+                @if ($errors->has('lokasi'))
+                    <span class="text-danger small">{{ $errors->first('lokasi') }}</span>
+                @endif
             </div>
         </div>
 
-        <div class="row mb-3">
-            <div class="col">
-                <button type="submit" class="btn btn-primary">Submit</button>
-                <a href="{{ route('prospects') }}" class="btn btn-warning">Kembali</a>
+        <div class="row">
+            <div class="col-md-6 d-grid">
+                <button type="submit" class="btn btn-warning">Kirim</button>
+            </div>
+            <div class="col-md-6 d-grid">
+                <a href="{{ route('prospects') }}" class="btn btn-primary">Kembali</a>
             </div>
         </div>
 
     </form>
-    @push('scripts')
+@push('js')
 <script>
     document.addEventListener("DOMContentLoaded", function () {
     const form = document.getElementById("prospect-form");
@@ -74,9 +74,10 @@
 
     if (form && loadingOverlay && submitButton) {
         form.addEventListener("submit", function (e) {
-            loadingOverlay.style.display = "flex"; // Tampilkan overlay
-            submitButton.disabled = true; // Nonaktifkan tombol
-            submitButton.textContent = "Loading..."; // Ubah teks tombol
+            loadingOverlay.style.display = "flex";
+            submitButton.disabled = true;
+            submitButton.textContent = "Loading...";
+            console.log("menjalankan submit");
         });
     } else {
         console.error("Form, loading overlay, atau tombol submit tidak ditemukan!");

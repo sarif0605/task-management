@@ -137,7 +137,7 @@ $(document).ready(function () {
     function deleteSurvey(surveyId) {
         Swal.fire({
             title: "Apakah Anda Yakin?",
-            text: `Anda yakin menghapus data dengan ID ${surveyId}?`,
+            text: `Anda yakin menghapus data ini?`,
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#d33",
@@ -156,7 +156,7 @@ $(document).ready(function () {
                         Swal.fire({
                             icon: "success",
                             title: "Deleted!",
-                            text: `Survey dengan ID ${surveyId} telah dihapus.`,
+                            text: `Data survey berhasil dihapus.`,
                             timer: 2000,
                         });
                         $("#table-survey").DataTable().ajax.reload();

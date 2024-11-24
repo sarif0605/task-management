@@ -56,7 +56,6 @@
             @if ($errors->has('rab'))
                 <span class="text-danger small">{{ $errors->first('rab') }}</span>
             @endif
-            <!-- Tampilkan File PDF yang Sudah Disimpan -->
             @if ($deal->rab)
                 <div class="mt-2">
                     <a href="{{ asset('storage/rab/' . $deal->rab) }}" target="_blank" class="btn btn-outline-secondary btn-sm">
@@ -101,23 +100,17 @@
         </div>
     </form>
 </div>
-
 @push('js')
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const form = document.getElementById("deal-form-update");
             const loadingOverlay = document.getElementById("loading");
             const submitButton = form.querySelector("button[type='submit']");
-
-            if (form && loadingOverlay && submitButton) {
-                form.addEventListener("submit", function () {
-                    loadingOverlay.style.display = "flex"; // Tampilkan loading overlay
-                    submitButton.disabled = true; // Nonaktifkan tombol submit
-                    submitButton.textContent = "Loading..."; // Ubah teks tombol
-                });
-            } else {
-                console.error("Form, loading overlay, atau tombol submit tidak ditemukan!");
-            }
+            form.addEventListener("submit", function (e) {
+                loadingOverlay.style.display = "flex";
+                submitButton.disabled = true;
+                submitButton.textContent = "Loading...";
+            });
         });
     </script>
     @endpush

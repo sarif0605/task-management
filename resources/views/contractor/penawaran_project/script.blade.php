@@ -50,17 +50,16 @@
                 }
             },
             {
-                data: "file_penawaran_project",
-                render: function (data, type, row) {
-                    if (data && Array.isArray(data) && data.length > 0) {
-                        const imageName = data[0].file; // Ambil file pertama
-                        const imageUrl = `/storage/penawaran/${imageName}`;
-                        return `
-                            <button onclick="downloadFile('${row.id}', 'pdf')" class="btn btn-primary btn-sm">
-                                Download
-                            </button>`;
-                    }
-                    return 'No File';
+                data: null,
+                orderable: false,
+                searchable: false,
+                render: function (data) {
+                    return `
+                        <div class="d-flex gap-2 justify-content-start">
+                            <button class="btn btn-primary btn-sm" onclick="downloadAllFiles('${data.id}')">
+                                <i class="fa-solid fa-download"></i> Download All
+                            </button>
+                        </div>`;
                 }
             },
             {
@@ -108,33 +107,26 @@
 });
 
 // Fungsi download file
-function downloadFile(id, type) {
+function downloadAllFiles(id) {
     $.ajax({
-        url: `/penawaran_projects/download/${id}/${type}`, // URL endpoint Laravel
+        url: `/penawaran_projects/download-all/${id}`, // URL endpoint Laravel
         type: 'POST',
         headers: {
-                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
-            },
+            "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+        },
         xhrFields: {
             responseType: 'blob' // Terima file dalam format blob
         },
         success: function(response, status, xhr) {
-            // Ambil nama file dari header Content-Disposition
             const contentDisposition = xhr.getResponseHeader('Content-Disposition');
             const fileName = contentDisposition
-                ? contentDisposition.split('filename=')[1]?.replace(/"/g, '') // Ambil nama file dari header
-                : `${type}_${id}.pdf`; // Nama default jika header tidak ada
-
-            // Buat objek blob
-            const blob = new Blob([response], { type: 'application/pdf' }); // Sesuaikan tipe MIME untuk Excel jika perlu
-
-            // Buat elemen link untuk mendownload file
+                ? contentDisposition.split('filename=')[1]?.replace(/"/g, '')
+                : `penawaran_files.zip`;
+            const blob = new Blob([response], { type: 'application/zip' });
             const link = document.createElement('a');
             link.href = window.URL.createObjectURL(blob);
             link.download = fileName;
             link.click();
-
-            // Bersihkan URL objek untuk menghindari kebocoran memori
             window.URL.revokeObjectURL(link.href);
         },
         error: function(xhr) {
@@ -142,7 +134,7 @@ function downloadFile(id, type) {
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                text: 'Failed to download file. Please try again.'
+                text: 'Failed to download files. Please try again.'
             });
         }
     });
@@ -170,7 +162,7 @@ function downloadFile(id, type) {
                         Swal.fire({
                             icon: "success",
                             title: "Deleted!",
-                            text: `Penawaran Project dengan ID ${surveyId} telah dihapus.`,
+                            text: `Penawaran Project telah dihapus.`,
                             timer: 2000,
                         });
                         $("#table-penawaran").DataTable().ajax.reload();

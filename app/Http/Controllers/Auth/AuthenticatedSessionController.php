@@ -27,18 +27,33 @@ class AuthenticatedSessionController extends Controller
     public function store(LoginRequest $request)
     {
         try {
+            // Autentikasi user berdasarkan kredensial
             $request->authenticate();
+
+            // Regenerasi sesi untuk mencegah serangan sesi
             $request->session()->regenerate();
-            Log::info('User berhasil login');
+
+            // Logging informasi login berhasil
+            Log::info('User berhasil login', ['user_id' => Auth::id()]);
+
+            // Periksa peran user dan arahkan ke dashboard jika kontraktor atau admin
             if (Auth::user()->hasRole('kontraktor') || Auth::user()->hasRole('admin')) {
                 return redirect()->route('dashboard');
             }
+
+            // Arahkan ke halaman default jika bukan kontraktor atau admin
             return redirect()->intended(RouteServiceProvider::HOME);
-        } catch (\Exception $e) {
-            Log::error('Login gagal', ['error' => $e->getMessage()]);
-            return redirect()->back()->withErrors([
-                'email' => 'Email atau password salah.',
-            ])->withInput();
+        } catch (\Throwable $e) {
+            // Logging error jika terjadi kegagalan saat login
+            Log::error('Login gagal', [
+                'error' => $e->getMessage(),
+                'email' => $request->input('email'),
+            ]);
+
+            // Redirect kembali ke halaman login dengan pesan error
+            return redirect()->back()
+                ->withErrors(['email' => 'Email atau password salah.'])
+                ->withInput();
         }
     }
 

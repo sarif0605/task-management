@@ -17,9 +17,7 @@ class PenawaranProject extends Model
 
     protected $fillable = [
         'pembuat_penawaran',
-        'prospect_id',
-        'file_pdf',
-        'file_excel',
+        'prospect_id'
     ];
 
     public function prospect()

@@ -78,6 +78,9 @@
 
                         <!-- Tombol Submit -->
                         <button type="submit" class="btn btn-primary mt-4 w-100">Register</button>
+                        <div class="text-center mt-2">
+                            <a class="small" href="{{ route('login') }}">Login!</a>
+                        </div>
                     </div>
                 </div>
             </form>

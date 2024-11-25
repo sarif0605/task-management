@@ -1,11 +1,17 @@
 @extends('auth.header')
-@section('title', 'Forgot Password')
-@section('head', 'Forgot Password')
+@section('head', 'Login User')
 @section('content')
+@include('components.loading')
+
 <div class="container">
-    <div class="d-flex justify-content-center align-items-center min-vh-100 w-80">
-        <div class="card shadow-lg p-4 border-0" style="max-width: 400px; width: 100%; background: linear-gradient(135deg, #ffffff, #f8f9fc); border-radius: 15px;">
-    @if (session('status'))
+    <div class="d-flex justify-content-center align-items-center min-vh-100">
+        <div class="card shadow-lg px-5 py-4 border-0 w-100"
+             style="max-width: 800px; background: linear-gradient(135deg, #ffffff, #f8f9fc); border-radius: 15px;">
+            <div class="text-center mb-4">
+                <h1 class="h4 text-gray-900">Forgot Password User!</h1>
+            </div>
+
+            @if (session('status'))
         <div class="alert alert-success" role="alert">
             {{ session('status') }}
         </div>
@@ -27,21 +33,22 @@
     <div class="card-footer text-center">
         <a class="small" href="{{ route('login') }}">Back to Login</a>
     </div>
+        </div>
+    </div>
 </div>
-</div>
-</div>
+
 @push('js')
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const form = document.getElementById("forgot-password-form");
-        const loadingOverlay = document.getElementById("loading");
-        const submitButton = form.querySelector("button[type='submit']");
-        form.addEventListener("submit", function (e) {
-            loadingOverlay.style.display = "flex";
-            submitButton.disabled = true;
-            submitButton.textContent = "Loading...";
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.getElementById("forgot-password-form");
+            const loadingOverlay = document.getElementById("loading");
+            const submitButton = form.querySelector("button[type='submit']");
+            form.addEventListener("submit", function (e) {
+                loadingOverlay.style.display = "flex";
+                submitButton.disabled = true;
+                submitButton.textContent = "Loading...";
+            });
         });
-    });
-</script>
-@endpush
-@endsection
+    </script>
+    @endpush
+    @endsection

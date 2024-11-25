@@ -1,15 +1,16 @@
 @extends('auth.header')
-@section('title', 'Login User')
 @section('head', 'Login User')
 @section('content')
-<hr />
 @include('components.loading')
+
 <div class="container">
-    <div class="d-flex justify-content-center align-items-center min-vh-100 w-80">
-        <div class="card shadow-lg p-4 border-0" style="max-width: 400px; width: 100%; background: linear-gradient(135deg, #ffffff, #f8f9fc); border-radius: 15px;">
+    <div class="d-flex justify-content-center align-items-center min-vh-100">
+        <div class="card shadow-lg px-5 py-4 border-0 w-100"
+             style="max-width: 800px; background: linear-gradient(135deg, #ffffff, #f8f9fc); border-radius: 15px;">
             <div class="text-center mb-4">
-                <h1 class="h4 text-gray-900">@yield('title')</h1>
+                <h1 class="h4 text-gray-900">Login User!</h1>
             </div>
+
             <form id="login-form" method="POST" action="{{ route('login') }}">
                 @csrf
                 <div class="form-group">
@@ -42,6 +43,7 @@
         </div>
     </div>
 </div>
+
 @push('js')
     <script>
         document.addEventListener("DOMContentLoaded", function () {
@@ -56,4 +58,4 @@
         });
     </script>
     @endpush
-@endsection
+    @endsection

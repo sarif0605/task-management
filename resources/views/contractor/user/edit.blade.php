@@ -23,10 +23,6 @@
                 <label class="form-label">Email</label>
                 <input type="email" name="email" class="form-control" placeholder="Tanggal" value="{{ $user->email }}" readonly>
             </div>
-            {{-- <div class="col mb-3">
-                <label class="form-label">Verifikasi</label>
-                <input type="date" name="email_verified_at" class="form-control" placeholder="Tanggal" value="{{ $user->email_verified_at }}" readonly>
-            </div> --}}
             <div class="col mb-3">
                 <label class="form-label">Status</label>
                 <select name="status_account" class="form-control" required>

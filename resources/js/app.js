@@ -1,12 +1,10 @@
 // import "./bootstrap";
-// import Alpine from "alpinejs";
+import Alpine from "alpinejs";
 // import Swal from "sweetalert2";
 
-// window.Alpine = Alpine;
-// window.Swal = Swal;
+window.Alpine = Alpine;
+Alpine.start();
 
-// Alpine.start();
+// import jQuery from "jquery";
 
-import jQuery from "jquery";
-
-window.$ = jQuery;
+// window.$ = jQuery;

@@ -5,68 +5,101 @@ namespace App\Http\Controllers\Constructor;
 use App\Exports\ReportProjectsExport;
 use App\Http\Controllers\Controller;
 use App\Models\DealProject;
+use App\Models\DealProjectUsers;
 use App\Models\ReportProject;
+use ArielMejiaDev\LarapexCharts\LarapexChart;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ReportProjectController extends Controller
 {
+    private function getProgressDetails($dealProjectId)
+    {
+        $reportProjects = ReportProject::where('deal_project_id', $dealProjectId)
+            ->where('status', '!=', 'plan')
+            ->get();
+        $totalWeight = $reportProjects->sum('bobot');
+        $weightedProgressSum = $reportProjects->sum(function ($project) {
+            return $project->bobot * ($project->progress / 100);
+        });
+
+        $overallProgress = $totalWeight > 0
+            ? round(($weightedProgressSum / $totalWeight) * 100, 2)
+            : 0;
+        $completedPercentage = $reportProjects->count() > 0
+                        ? round(($reportProjects->where('status', 'selesai')->count() / $reportProjects->count()) * 100, 2)
+                        : 0;
+        $remainingPercentage = $reportProjects->count() > 0
+                        ? round((($reportProjects->count() - $reportProjects->where('status', 'selesai')->count()) / $reportProjects->count()) * 100, 2)
+                        : 0;
+        Log::info('Progress Details', [
+            'completedPercentage' => $completedPercentage, // Ensure this is set
+            'remainingPercentage' => $remainingPercentage, // Ensure this is set
+        ]);
+        return [
+            'totalWeight' => round($totalWeight, 2),
+            'overallProgress' => $overallProgress,
+            'totalTasks' => $reportProjects->count(),
+            'completedTasks' => $reportProjects->where('status', 'selesai')->count(),
+            'completedPercentage' => $completedPercentage, // Ensure this is set
+            'remainingPercentage' => $remainingPercentage, // Ensure this is set
+        ];
+    }
+
     public function index(Request $request)
     {
-        if ($request->ajax()) {
-            try {
-                $user = Auth::user();
-                $query = ReportProject::with(['deal_project.prospect', 'updatedBy']);
-                if ($request->has('deal_project_id') && $request->deal_project_id) {
-                    $query->where('deal_project_id', $request->deal_project_id);
-                    $progressData = ReportProject::calculateProjectProgress($request->deal_project_id);
-                    $chartData = [
-                        'chart' => [
-                            'type' => 'donut'
-                        ],
-                        'title' => [
-                            'text' => 'Project Progress'
-                        ],
-                        'series' => [
-                            round($progressData['totalProgress'], 2),
-                            round(100 - $progressData['totalProgress'], 2)
-                        ],
-                        'labels' => ['Completed', 'Remaining'],
-                        'colors' => ['#3498db', '#e74c3c']
-                    ];
-                }
+        $deal_project_id = $request->input('deal_project_id');
+        $user = Auth::user();
+        $isSupervisor = $user->hasPosition('Pengawas'); // Cek posisi user
+        $dealProjects = collect();
+        $report = collect();
+        $progressDetails = null;
 
-                if ($user->position === 'pengawas') {
-                    $query->whereHas('deal_project.deal_project_users', function($q) use ($user) {
-                        $q->where('user_id', $user->id);
-                    });
-                }
-
-                $reports = $query->orderBy('created_at', 'DESC')->get();
-
-                return response()->json([
-                    'status' => 'success',
-                    'data' => $reports,
-                    'chart' => $chartData ?? null,
-                    'progress' => isset($progressData) ? [
-                        'totalProgress' => round($progressData['totalProgress'], 2),
-                        'totalBobot' => round($progressData['totalBobot'], 2)
-                    ] : null
-                ]);
-
-            } catch (\Exception $e) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'An error occurred while processing your request',
-                    'error' => $e->getMessage()
-                ], 500);
-            }
+        // Ambil dealProjects berdasarkan posisi user
+        if ($isSupervisor) {
+            $dealProjects = DealProject::whereHas('deal_project_users', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })->get();
+            Log::info('Pengawas', ['dealProjects' => $dealProjects]);
+        } else {
+            $dealProjects = DealProject::all(); // Tampilkan semua untuk selain Pengawas
         }
 
-        $deals = DealProject::all();
-        return view('contractor.report_project.index', compact('deals'));
+        // Ambil laporan dan detail progres jika ada deal_project_id
+        if ($deal_project_id) {
+            $report = ReportProject::with(['deal_project.prospect', 'updatedBy'])
+                ->where('deal_project_id', $deal_project_id)
+                ->orderBy('excel_row_number')
+                ->get();
+
+            $progressDetails = $this->getProgressDetails($deal_project_id);
+        }
+
+        // Jika permintaan AJAX, kembalikan data sebagai JSON
+        if ($request->ajax()) {
+            return response()->json([
+                'status' => 'success',
+                'data' => $report,
+                'progress' => [
+                    'totalProgress' => $progressDetails['overallProgress'] ?? 0,
+                    'totalBobot' => $progressDetails['totalWeight'] ?? 0,
+                    'totalTasks' => $progressDetails['totalTasks'] ?? 0,
+                    'completedTasks' => $progressDetails['completedTasks'] ?? 0,
+                    'completedPercentage' => $progressDetails['completedPercentage'] ?? 0,
+                    'remainingPercentage' => $progressDetails['remainingPercentage'] ?? 0,
+                ],
+            ]);
+        }
+
+        // Kembalikan tampilan dengan data yang sesuai
+        return view('contractor.report_project.index', [
+            'deals' => $dealProjects,
+            'progress' => $progressDetails,
+        ]);
     }
 
     public function import(Request $request, $deal_project_id)
@@ -135,35 +168,39 @@ class ReportProjectController extends Controller
         }
         return view('contractor.report_project.show', compact('report_project'));
     }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function edit($id)
     {
-        $material = ReportProject::find($id);
-        $operationalProject = DealProject::all();
-        if (!$material) {
-            return redirect()->route('report_projects.edit')
-            ->with('error', 'Material dengan ID ' . $id . ' tidak ditemukan.');
+        $report = ReportProject::find($id);
+        if (!$report) {
+            return response()->json(['error' => 'Report not found'], 404);
         }
-        return view('contractor.material.edit', compact('material', 'operationalProject'));
+        return response()->json($report);
     }
+
 
     public function update(Request $request, $id)
     {
+        Log::info('id', ['id' => $id]);
         $validatedData = $request->validate([
             'status' => 'required|in:plan,mulai,selesai,belum',
-            'progress' => 'nullable|numeric|min:0|max:100',
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date'
         ]);
         $reportProject = ReportProject::findOrFail($id);
-        $validatedData['updated_by'] = Auth::id();
-
-        $reportProject->update($validatedData);
-
-        return redirect()->back()->with('success', 'Project update recorded successfully');
+        $reportProject->status = $validatedData['status'];
+        $reportProject->updated_by = Auth::id();
+        if ($validatedData['status'] === 'mulai') {
+            $reportProject->start_date = $reportProject->start_date ?? now();
+        }
+        if ($validatedData['status'] === 'selesai') {
+            $reportProject->end_date = now();
+            $reportProject->progress = $reportProject->bobot;
+            $reportProject->harian = 0;
+            $reportProject->durasi = $reportProject->end_date->diffInDays($reportProject->start_date);
+        }
+        $reportProject->save();
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Project update recorded successfully',
+        ]);
     }
 
     /**

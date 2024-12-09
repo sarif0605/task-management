@@ -8,10 +8,8 @@
       <div class="sidebar-brand-text mx-3">CV Bina<br>Nusa Prima</div>
     </a>
 
-    <!-- Divider -->
     <hr class="sidebar-divider my-0">
 
-    <!-- Nav Item - Dashboard -->
     <li class="nav-item">
       <a class="nav-link" href="{{ route('dashboard') }}">
         <i class="fas fa-home"></i>
@@ -37,7 +35,7 @@
       </a>
     </li>
 
-    @if (Auth::check() && !Auth::user()->hasPosition('Pengawas'))
+    @if (Auth::check() && (Auth::user()->hasPosition('Admin') || Auth::user()->hasPosition('Marketing')))
     <!-- Nav Item - Prospect -->
     <li class="nav-item">
       <a class="nav-link" href="{{ route('prospects') }}">
@@ -46,8 +44,7 @@
       </a>
     </li>
     @endif
-
-    <!-- Nav Item - Survey -->
+    @if (Auth::check() && !Auth::user()->hasPosition('Pengawas'))
     <li class="nav-item">
       <a class="nav-link" href="{{ route('surveys') }}">
         <i class="fas fa-poll"></i>
@@ -70,6 +67,7 @@
         <span>Deal Project</span>
       </a>
     </li>
+    @endif
 
     <!-- Nav Item - Report Project -->
     <li class="nav-item">

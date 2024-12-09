@@ -90,16 +90,20 @@ class DealProjectController extends Controller
     public function edit(string $id)
     {
         $deal = DealProject::find($id);
-        $users = User::with(['profile', 'position'])
-            ->whereDoesntHave('position', function($query) {
-                $query->where('name', 'Admin'); // Hindari user dengan posisi "Admin"
-            })
-            ->get();
+
         if (!$deal) {
             return redirect()->route('deal_projects.edit')
                 ->with('error', 'Deal Projects dengan ID ' . $id . ' tidak ditemukan.');
         }
-        return view('contractor.done_deal.edit', compact('deal', 'users'));
+
+        // Ambil semua user dengan posisi "Pengawas"
+        $users = User::with(['profile', 'position'])
+            ->whereHas('position', function ($query) {
+                $query->where('name', 'Pengawas');
+            })
+            ->get();
+            $selectedUsers = $deal->users()->select('users.id')->pluck('users.id')->toArray();
+        return view('contractor.done_deal.edit', compact('deal', 'users', 'selectedUsers'));
     }
 
     /**

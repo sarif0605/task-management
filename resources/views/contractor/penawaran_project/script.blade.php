@@ -57,7 +57,7 @@
                     return `
                         <div class="d-flex gap-2 justify-content-start">
                             <button class="btn btn-primary btn-sm" onclick="downloadAllFiles('${data.id}')">
-                                <i class="fa-solid fa-download"></i> Download All
+                                <i class="fas fa-download"></i> Download
                             </button>
                         </div>`;
                 }
@@ -69,32 +69,21 @@
                 render: function (data) {
                     let buttons = '';
                     buttons += `
-                        <button type="button" class="btn btn-primary btn-sm show-btn" data-id="${data.id}">
-                            <i class="fa-solid fa-circle-info"></i>
-                        </button>
+                        <a href="/penawaran_projects/show/${data.id}" class="btn btn-sm btn-secondary"><i class="fas fa-info-circle"></i></a>
                     `;
                     if (userPosition === "Admin" || userPosition === "Sales") {
                         buttons += `
-                            <button type="button" class="btn btn-warning btn-sm edit-btn" data-id="${data.id}">
-                                <i class="fa-solid fa-pen"></i>
-                            </button>
+                            <a href="/penawaran_projects/edit/${data.id}" class="btn btn-sm btn-warning"><i class="fas fa-pen"></i></a>
                         `;
                     }
                     if (userPosition === "Admin") {
                         buttons += `
                             <button class="btn btn-danger btn-sm delete-btn" data-id="${data.id}">
-                                <i class="fa-solid fa-trash"></i>
+                                <i class="fas fa-trash-alt"></i>
                             </button>
                         `;
                     }
-
-                    return `<div class="d-flex gap-2 justify-content-start">
-                        <a href="/penawaran_projects/show/${data.id}" class="btn btn-secondary"><i class="fa-solid fa-circle-info"></i></a>
-                                <a href="/penawaran_projects/edit/${data.id}" class="btn btn-warning"><i class="fa-solid fa-pen-to-square"></i></a>
-                            <button class="btn btn-danger btn-sm delete-btn" data-id="${data.id}">
-                                <i class="fa-solid fa-trash-arrow-up"></i>
-                            </button>
-                            </div>`;
+                    return `<div class="d-flex gap-2 justify-content-start">${buttons}</div>`;
                 },
             },
         ]

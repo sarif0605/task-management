@@ -23,6 +23,7 @@ class isStatusAccount
             return response(
                 '<script>
                     alert("Akun Anda belum aktif. Silakan hubungi admin.");
+                    window.location.href = "/dashboard";
                 </script>',
                 401
             );

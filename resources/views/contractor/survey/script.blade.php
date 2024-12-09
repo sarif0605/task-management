@@ -87,39 +87,25 @@ $(document).ready(function () {
                 render: function (data, type, row) {
                     if (userPosition === "Admin") {
                         return ` <div class="d-flex gap-2 justify-content-start">
-                        <a href="/surveys/show/${data.id}" class="btn btn-secondary"><i class="fa-solid fa-circle-info"></i></a>
-                                <a href="/surveys/edit/${data.id}" class="btn btn-warning"><i class="fa-solid fa-pen-to-square"></i></a>
+                        <a href="/surveys/show/${data.id}" class="btn btn-sm btn-secondary">
+                            <i class="fas fa-info-circle"></i>
+                        </a>
+                        <a href="/surveys/edit/${data.id}" class="btn btn-sm btn-warning">
+                            <i class="fas fa-pen"></i>
+                        </a>
                             <button class="btn btn-danger btn-sm delete-btn" data-id="${data.id}">
-                                <i class="fa-solid fa-trash-arrow-up"></i>
+                                <i class="fas fa-trash-alt"></i>
                             </button>
                             </div>
                         `;
                     } else if (userPosition === "Sales") {
                         return `
                         <div class="d-flex gap-2 justify-content-start">
-                        <button type="button" class="btn btn-primary btn-sm add-btn"
-                                data-id="${data.id}"
-                                data-prospect-id="${data.prospect_id}"
-                                data-bs-toggle="modal"
-                                data-bs-target="#exampleModal">
-                                <i class="fa-solid fa-plus">
-                            </button>
-                            <button type="button" class="btn btn-primary btn-sm show-btn"
-                                data-id="${data.id}"
-                                data-prospect-id="${data.prospect_id}"
-                                data-bs-toggle="modal"
-                                data-bs-target="#showModal">
-                                <i class="fa-solid fa-circle-info"></i>
-                            </button> </div>`;
+                        <a href="/surveys/show/${data.id}" class="btn btn-secondary"><i class="fas fa-info-circle"></i></a>
+                                <a href="/surveys/edit/${data.id}" class="btn btn-warning"><i class="fas fa-pen"></i></a> </div>`;
                     } else {
                         return `
-                            <button type="button" class="btn btn-primary show-btn"
-                                data-id="${data.id}"
-                                data-prospect-id="${data.prospect_id}"
-                                data-bs-toggle="modal"
-                                data-bs-target="#showModal">
-                                <i class="fa-solid fa-circle-info"></i>
-                            </button>
+                            <a href="/surveys/show/${data.id}" class="btn btn-secondary"><i class="fas fa-info-circle"></i></a>
                         `;
                     }
                 },

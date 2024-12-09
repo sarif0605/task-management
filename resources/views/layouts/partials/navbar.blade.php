@@ -22,7 +22,7 @@
                 <a class="dropdown-item" href="/profile">
                     <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>Profile</a>
                 @if (Auth::user() && Auth::user()->email_verified_at == null)
-                    <a class="dropdown-item" href="{{ route('verifikasi-view') }}">
+                    <a class="dropdown-item" href="{{ route('verify-email') }}">
                         <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>Verifikasi Email
                     </a>
                 @endif

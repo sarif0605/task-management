@@ -1,5 +1,4 @@
 <script type="text/javascript">
-var userPosition = "{{ Auth::user()->position->pluck('name')->join(', ') }}";
 $(document).ready(function () {
     $("#table-user").DataTable({
         processing: true,
@@ -39,15 +38,16 @@ $(document).ready(function () {
                 orderable: false,
                 searchable: false,
                 render: function (data) {
-                    if (userPosition === "Admin") {
-                        return `
-                            <a href="/users/show/${data.id}" class="btn btn-secondary"><i class="fa-solid fa-circle-info"></i></a>
-                            <a href="/users/edit/${data.id}" class="btn btn-warning"><i class="fa-solid fa-pen-to-square"></i></a>
-                            <button class="btn btn-danger delete-btn" data-id="${data.id}"><i class="fa-solid fa-trash-arrow-up"></i></button>
+                        return ` <div class="d-flex gap-2 justify-content-start">
+                            <a href="/users/show/${data.id}" class="btn btn-sm btn-secondary">
+                                <i class="fas fa-info-circle"></i>
+                            </a>
+                            <a href="/users/edit/${data.id}" class="btn btn-sm btn-warning">
+                                <i class="fas fa-pen"></i>
+                            </a>
+                            <button class="btn btn-sm btn-danger delete-btn" data-id="${data.id}"><i class="fas fa-trash-alt"></i></button>
+                            </div>
                         `;
-                    } else {
-                        return `<a href="/users/show/${data.id}" class="btn btn-secondary"><i class="fa-solid fa-circle-info"></i></a>`;
-                    };
                 },
             },
         ],

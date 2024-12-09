@@ -70,20 +70,20 @@
                     render: function (data) {
                         if (userPosition === "Marketing" || userPosition === "Admin") {
                             return `
-                                    <div class="d-flex gap-2 justify-content-start">
-                                        <a href="/prospects/show/${data.id}" class="btn btn-secondary btn-sm">
-                                            <i class="fa-solid fa-circle-info"></i>
-                                        </a>
-                                        <a href="/prospects/edit/${data.id}" class="btn btn-warning btn-sm">
-                                            <i class="fa-solid fa-pen-to-square"></i>
-                                        </a>
-                                        <button class="btn btn-danger btn-sm delete-btn" data-id="${data.id}" data-nama-produk="${data.nama_produk}">
-                                            <i class="fa-solid fa-trash-arrow-up"></i>
-                                        </button>
-                                    </div>`;
+                                <div class="d-flex gap-2 justify-content-start">
+                                    <a href="/prospects/show/${data.id}" class="btn btn-secondary btn-sm">
+                                        <i class="fas fa-info-circle"></i>
+                                    </a>
+                                    <a href="/prospects/edit/${data.id}" class="btn btn-warning btn-sm">
+                                        <i class="fas fa-pen"></i>
+                                    </a>
+                                    <button class="btn btn-danger btn-sm delete-btn" data-id="${data.id}" data-nama-produk="${data.nama_produk}">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </div>`;
                         } else {
-                            return `<a href="/prospects/show/${data.id}" class="btn btn-secondary"><i class="fa-solid fa-circle-info"></i></a>`;
-                        };
+                            return `<a href="/prospects/show/${data.id}" class="btn btn-secondary"><i class="fas fa-info-circle"></i></a>`;
+                        }
                     },
                 },
             ],

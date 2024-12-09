@@ -29,4 +29,10 @@ class DealProject extends Model
     public function report_project(){
         return $this->hasMany(ReportProject::class, 'report_project_id', 'id');
     }
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'deal_project_users', 'deal_project_id', 'user_id');
+    }
+
 }

@@ -60,20 +60,22 @@
                         if (userPosition.includes("Admin")) {
                             return `
                                 <div class="d-flex gap-2 justify-content-start">
-                        <a href="/deal_projects/show/${data.id}" class="btn btn-secondary"><i class="fa-solid fa-circle-info"></i></a>
-                                <a href="/deal_projects/edit/${data.id}" class="btn btn-warning"><i class="fa-solid fa-pen-to-square"></i></a>
+                        <a href="/deal_projects/show/${data.id}" class="btn btn-sm btn-secondary"><i class="fas fa-info-circle"></i></a>
+                                <a href="/deal_projects/edit/${data.id}" class="btn btn-sm btn-warning"><i class="fas fa-pen"></i></a>
                             <button class="btn btn-danger btn-sm delete-btn" data-id="${data.id}">
-                                <i class="fa-solid fa-trash-arrow-up"></i>
+                                <i class="fas fa-trash-alt"></i>
                             </button>
                             </div>`;
                         } else if (userPosition.includes("Sales")) {
-                            return `
-                                <button class="btn btn-primary show-btn" data-id="${data.id}" data-bs-toggle="modal" data-bs-target="#showModal"><i class="fa-solid fa-circle-info"></i></button>
-                                <button class="btn btn-warning add-btn" data-id="${data.id}" data-bs-toggle="modal" data-bs-target="#exampleModal"><i class="fa-solid fa-plus"></i></button>
+                            return ` <div class="d-flex gap-2 justify-content-start">
+                                <a href="/deal_projects/show/${data.id}" class="btn btn-sm btn-secondary"><i class="fas fa-info-circle"></i></a>
+                                <a href="/deal_projects/edit/${data.id}" class="btn btn-sm btn-warning"><i class="fas fa-pen"></i></a> </div>
                             `;
                         } else {
                             return `
-                                <button class="btn btn-primary show-btn" data-id="${data.id}" data-bs-toggle="modal" data-bs-target="#showModal"><i class="fa-solid fa-circle-info"></i></button>
+                               <div class="d-flex gap-2 justify-content-start">
+                                <a href="/deal_projects/show/${data.id}" class="btn btn-sm btn-secondary"><i class="fas fa-info-circle"></i></a>
+                                </div>
                             `;
                         }
                     },

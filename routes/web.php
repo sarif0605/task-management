@@ -145,7 +145,7 @@ Route::middleware('auth')->group(function () {
         Route::get('show/{id}', 'show')->name('report_projects.show');
         Route::post('export/{deal_project_id}', 'import')->name('report_projects.export');
         Route::get('edit/{id}', 'edit')->name('report_projects.edit');
-        Route::put('edit/{id}', 'update')->name('report_projects.update');
+        Route::put('update/{id}', 'update')->name('report_projects.update');
         Route::delete('destroy/{id}', 'destroy')->name('report_projects.destroy');
     });
 

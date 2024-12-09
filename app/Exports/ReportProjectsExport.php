@@ -4,11 +4,11 @@ namespace App\Exports;
 
 use App\Models\ReportProject;
 use Carbon\Carbon;
-use Maatwebsite\Excel\Concerns\FromCollection;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use Illuminate\Support\Str;
 
 class ReportProjectsExport implements ToCollection, WithHeadingRow
 {
@@ -21,43 +21,39 @@ class ReportProjectsExport implements ToCollection, WithHeadingRow
 
     public function collection(Collection $rows)
     {
-        foreach ($rows as $row) {
-            // Validasi keberadaan kolom menggunakan has()
-            if (!$row->has('mulai') || !$row->has('selesai') || !$row->has('status')) {
-                Log::error('Baris tidak valid', $row->toArray());
-                continue;
-            }
+        $dataToInsert = [];
 
-            try {
-                // Handle null values
-                $startDate = !is_null($row['mulai']) ? $this->convertExcelDate($row['mulai']) : null;
-                $endDate = !is_null($row['selesai']) ? $this->convertExcelDate($row['selesai']) : null;
-                $status = strtolower($row['status']);
+        foreach ($rows as $index => $row) {
+            $startDate = !empty($row['mulai']) ? $this->convertExcelDate($row['mulai']) : null;
+            $endDate = !empty($row['selesai']) ? $this->convertExcelDate($row['selesai']) : null;
+            $status = strtolower($row['status'] ?? '');
 
-                // Validasi status
-                if (in_array($status, ['plan', 'mulai', 'selesai', 'belum'])) {
-                    ReportProject::create([
-                        'deal_project_id' => $this->deal_project_id,
-                        'pekerjaan' => $row['pekerjaan'] ?? null,
-                        'status' => $status,
-                        'start_date' => $startDate,
-                        'end_date' => $endDate,
-                        'bobot' => $row['bobot'] ?? 0.0,
-                        'progress' => $row['progress'] ?? 0.0,
-                        'durasi' => $row['durasi'] ?? 0.0,
-                        'harian' => $row['harian'] ?? 0.0,
-                    ]);
-                    Log::info('Berhasil', ['status' => $status]);
-                } else {
-                    Log::error('Invalid status value', ['status' => $row['status'] ?? 'undefined']);
-                }
-            } catch (\Exception $e) {
-                Log::error('Error parsing dates', [
-                    'mulai' => $row['mulai'],
-                    'selesai' => $row['selesai'],
-                    'error' => $e->getMessage(),
+            if (in_array($status, ['plan', 'mulai', 'selesai', 'belum'])) {
+                Log::info('Processing row', [
+                    'row_number' => $index + 1,
+                    'pekerjaan' => $row['pekerjaan'] ?? null,
+                    'status' => $row['status'] ?? null,
                 ]);
+                $dataToInsert[] = [
+                    'id' => Str::uuid(),
+                    'deal_project_id' => $this->deal_project_id,
+                    'pekerjaan' => $row['pekerjaan'] ?? null,
+                    'status' => $status,
+                    'start_date' => $startDate,
+                    'end_date' => $endDate,
+                    'bobot' => $row['bobot'] ?? 0.0,
+                    'progress' => $row['progress'] ?? 0.0,
+                    'durasi' => $row['durasi'] ?? 0.0,
+                    'harian' => $row['harian'] ?? 0.0,
+                    'excel_row_number' => $index + 1, // Menyimpan urutan asli dari Excel
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
             }
+        }
+
+        if (!empty($dataToInsert)) {
+            ReportProject::insert($dataToInsert);
         }
     }
 
@@ -66,11 +62,16 @@ class ReportProjectsExport implements ToCollection, WithHeadingRow
      */
     private function convertExcelDate($date)
     {
-        if (is_numeric($date)) {
-            // 1 = 1900-01-01 di Excel
-            return Carbon::createFromFormat('Y-m-d', '1900-01-01')->addDays($date - 2)->format('Y-m-d');
+        try {
+            if (is_numeric($date)) {
+                return Carbon::createFromFormat('Y-m-d', '1900-01-01')
+                    ->addDays($date - 2)
+                    ->format('Y-m-d');
+            }
+            return Carbon::parse($date)->format('Y-m-d');
+        } catch (\Exception $e) {
+            Log::error('Error converting date', ['date' => $date, 'error' => $e->getMessage()]);
+            return null;
         }
-        // Jika sudah dalam format string
-        return Carbon::parse($date)->format('Y-m-d');
     }
 }
